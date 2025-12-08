@@ -26,6 +26,14 @@
                     </a>
                 </li>
                 <li class="sidebar-item">
+                    <a class="sidebar-link {{ in_array(Request::segment(2), ['plans', 'plans_create', 'plans_edit']) ? 'active' : '' }}"
+                        href="{{ route('admin.plan_index') }}" aria-expanded="false">
+                        <i class="ti ti-user-circle"></i>
+                        <span class="hide-menu">Plans</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item">
                     <a class="sidebar-link justify-content-between has-arrow {{ in_array(Request::segment(2), ['term_conditions', 'privacy_policy', 'edit_user']) ? 'active' : '' }}"
                         href="javascript:void(0)" aria-expanded="false">
                         <div class="d-flex align-items-center gap-3">

@@ -1,9 +1,17 @@
 var base_url = $("#base_url").val();
-
 $("#add_user_form").validate({
     // onkeyup: false,
+        onfocusout: function (element) {
+        $(element).valid();
+    },
     rules: {
-        name: {
+        first_name: {
+            required: true,
+        },
+        last_name: {
+            required: true,
+        },
+        phone: {
             required: true,
         },
         email: {
@@ -30,10 +38,17 @@ $("#add_user_form").validate({
         password: {
             required: true,
         },
+        c_password: {
+            required: true,
+            equalTo: "#password"
+        }
     },
     messages: {
-        name: {
-            required: "Please enter name",
+        first_name: {
+            required: "Please enter first name",
+        },
+        last_name: {
+            required: "Please enter last name",
         },
         email: {
             required: "Please enter email",
@@ -43,6 +58,10 @@ $("#add_user_form").validate({
         password: {
             required: "Please enter a password",
         },
+        c_password: {
+            required: "Please confirm password",
+            equalTo: "Password and confirm password must match"
+        }
     },
     normalizer: function (value) {
         return $.trim(value);

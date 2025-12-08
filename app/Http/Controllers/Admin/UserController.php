@@ -26,6 +26,7 @@ class UserController extends Controller
         $page = 'admin.user.add';
         $js = ['user'];
 
+
         return view("layouts.admin.layout", compact(
             'title',
             'page',
@@ -37,16 +38,17 @@ class UserController extends Controller
     {
         try {
             $validated = $request->validate([
-                'first_name'        => 'required|string|max_length:255',
-                'last_name'         => 'required|string|max_length:255',
+                'first_name'        => 'required|string|max:255',
+                'last_name'         => 'required|string|max:255',
                 'email'             => 'required|email|unique:users,email',
                 'phone'             => 'nullable|string|max:20',
-                'password'          => 'required|min:6|confirmed',
+                'password'          => 'required|min:6',
                 'country'           => 'nullable|string|max:255',
             ]);
             DB::beginTransaction();
 
             $newUser = new User();
+            $newUser->name = $validated['first_name'];
             $newUser->first_name = $validated['first_name'];
             $newUser->last_name  = $validated['last_name'];
             $newUser->email      = $validated['email'];
@@ -60,7 +62,7 @@ class UserController extends Controller
             return redirect()->route('admin.user')->with('msg_success', 'User added successfully !');
         } catch (QueryException $e) {
             DB::rollBack();
-            return redirect()->route('admin.user.add')->with('msg_error', 'User not added' . $e->getMessage());
+            return redirect()->back()->with('msg_error', 'User not added' . $e->getMessage());
         }
     }
 

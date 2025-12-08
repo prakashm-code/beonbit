@@ -44,7 +44,9 @@
 
     <x-admin.bodyfooter page="{{ $page }}" />
 
-    <x-admin.footer :js="$js ?? []" page="{{ $page }}" />
+
+    <x-admin.footer :js="$js ?? []"/>
+
 </body>
 
 </html>

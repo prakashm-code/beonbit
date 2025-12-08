@@ -36,12 +36,13 @@ Route::middleware(AdminAuth::class)->group(function () {
     Route::post('admin/privacy_policy_store', [PrivacyPolicyController::class, 'store'])->name('admin.privacy_policy_store');
     Route::post('admin/privacy_policy_edit', [PrivacyPolicyController::class, 'edit'])->name('admin.privacy_policy_edit');
 
-    Route::get('/plans', [PlanController::class, 'index'])->name('admin.plan_index');
-    Route::get('/plans/create', [PlanController::class, 'create'])->name('admin.plan_create');
-    Route::post('/plans/store', [PlanController::class, 'store'])->name('admin.plan_store');
-    Route::get('/plans/edit/{id}', [PlanController::class, 'edit'])->name('admin.plan_edit');
-    Route::post('/plans/update/{id}', [PlanController::class, 'update'])->name('admin.plan_update');
-    Route::delete('/plans/{id}', [PlanController::class, 'destroy'])->name('admin.plan_destroy');
+    Route::get('admin/plans', [PlanController::class, 'index'])->name('admin.plan_index');
+    Route::get('admin/plans_create', [PlanController::class, 'create'])->name('admin.plan_create');
+    Route::post('admin/plans_store', [PlanController::class, 'store'])->name('admin.plan_store');
+    Route::get('admin/plans_edit/{id}', [PlanController::class, 'edit'])->name('admin.plan_edit');
+    Route::post('admin/plans_update/{id}', [PlanController::class, 'update'])->name('admin.plan_update');
+    Route::delete('admin/plans_delete{id}', [PlanController::class, 'destroy'])->name('admin.plan_destroy');
+    Route::post('admin/plans_update_status', [PlanController::class, 'updateStatus'])->name('admin.plan_update_status');
 });
 
 Route::get('/admin', function () {

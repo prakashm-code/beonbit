@@ -6,7 +6,7 @@
                     <h5 class="card-title fw-semibold">Plan List</h5>
                 </div>
                 <div>
-                    <a href="{{ route('admin.plan_store') }}" class="btn btn-primary">Add Plan +</a>
+                    <a href="{{ route('admin.plan_create') }}" class="btn btn-primary">Add Plan +</a>
                 </div>
             </div>
             <div class="col-lg-12 d-flex align-items-stretch">
