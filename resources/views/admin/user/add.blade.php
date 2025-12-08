@@ -19,14 +19,29 @@
                                     placeholder="Please enter last name">
                             </div>
                             <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" name="email" class="form-control" id="email"
+                                    placeholder="Please enter email">
+                            </div>
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Phone Number</label>
+                                <input type="text" name="phone" class="form-control" id="phone"
+                                    placeholder="Please enter mobile number">
+                            </div>
+                            <div class="mb-3">
                                 <label for="password" class="form-label">Password</label>
                                 <input type="password" name="password" class="form-control" id="password"
                                     placeholder="Please enter password">
                             </div>
                             <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" name="email" class="form-control" id="email"
-                                    placeholder="Please enter email">
+                                <label for="c_password" class="form-label">Confirm Password</label>
+                                <input type="password" name="c_password" class="form-control" id="c_password"
+                                    placeholder="Please confirm your password">
+                            </div>
+                            <div class="mb-3">
+                                <label for="country" class="form-label">Country</label>
+                                <input type="text" name="country" class="form-control" id="country"
+                                    placeholder="Please enter country">
                             </div>
                             <button type="submit" class="btn btn-primary">Add</button>
                         </form>

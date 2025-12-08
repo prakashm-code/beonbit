@@ -19,28 +19,6 @@
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a class="sidebar-link {{ in_array(Request::segment(2), ['category', 'add_category', 'edit_category']) ? 'active' : '' }}"
-                        href="{{ route('admin.category') }}" aria-expanded="false">
-                        <i class="ti ti-layout-grid"></i>
-                        <span class="hide-menu">Categories</span>
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a class="sidebar-link {{ in_array(Request::segment(2), ['image', 'add_image', 'edit_image']) ? 'active' : '' }}"
-                        href="{{ route('admin.image') }}" aria-expanded="false">
-                        <i class="ti ti-cards"></i>
-                        <span class="hide-menu">Image Manager</span>
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a class="sidebar-link {{ in_array(Request::segment(2), ['video', 'add_video', 'edit_video']) ? 'active' : '' }}"
-                        href="{{ route('admin.video') }}" aria-expanded="false">
-                        <i class="ti ti-chart-donut-3"></i>
-                        <span class="hide-menu">Video Manager</span>
-                    </a>
-                </li>
-
-                <li class="sidebar-item">
                     <a class="sidebar-link {{ in_array(Request::segment(2), ['user', 'add_user', 'edit_user']) ? 'active' : '' }}"
                         href="{{ route('admin.user') }}" aria-expanded="false">
                         <i class="ti ti-user-circle"></i>

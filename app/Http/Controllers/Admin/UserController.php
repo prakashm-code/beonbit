@@ -36,13 +36,25 @@ class UserController extends Controller
     public function store(Request $request)
     {
         try {
+            $validated = $request->validate([
+                'first_name'        => 'required|string|max_length:255',
+                'last_name'         => 'required|string|max_length:255',
+                'email'             => 'required|email|unique:users,email',
+                'phone'             => 'nullable|string|max:20',
+                'password'          => 'required|min:6|confirmed',
+                'country'           => 'nullable|string|max:255',
+            ]);
             DB::beginTransaction();
+
             $newUser = new User();
-            $newUser->first_name = $request->first_name;
-            $newUser->last_name = $request->last_name;
-            $newUser->email = $request->email;
-            $newUser->password =  Hash::make($request->password);
-            $newUser->role = "0";
+            $newUser->first_name = $validated['first_name'];
+            $newUser->last_name  = $validated['last_name'];
+            $newUser->email      = $validated['email'];
+            $newUser->phone      = $validated['phone'] ?? null;
+            $newUser->country    = $validated['country'] ?? null;
+            $newUser->password   = Hash::make($validated['password']);
+            $newUser->role       = "0";
+            $newUser->is_verified = "1";
             $newUser->save();
             DB::commit();
             return redirect()->route('admin.user')->with('msg_success', 'User added successfully !');

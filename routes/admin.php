@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\TermConditionController;
 use App\Http\Controllers\Admin\VideoController;
 use App\Http\Controllers\Admin\VideoStreamController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\PlanController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\AdminAuth;
 use App\Models\WebPages;
@@ -35,7 +36,12 @@ Route::middleware(AdminAuth::class)->group(function () {
     Route::post('admin/privacy_policy_store', [PrivacyPolicyController::class, 'store'])->name('admin.privacy_policy_store');
     Route::post('admin/privacy_policy_edit', [PrivacyPolicyController::class, 'edit'])->name('admin.privacy_policy_edit');
 
-
+    Route::get('/plans', [PlanController::class, 'index'])->name('admin.plan_index');
+    Route::get('/plans/create', [PlanController::class, 'create'])->name('admin.plan_create');
+    Route::post('/plans/store', [PlanController::class, 'store'])->name('admin.plan_store');
+    Route::get('/plans/edit/{id}', [PlanController::class, 'edit'])->name('admin.plan_edit');
+    Route::post('/plans/update/{id}', [PlanController::class, 'update'])->name('admin.plan_update');
+    Route::delete('/plans/{id}', [PlanController::class, 'destroy'])->name('admin.plan_destroy');
 });
 
 Route::get('/admin', function () {

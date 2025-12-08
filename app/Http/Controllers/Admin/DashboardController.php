@@ -3,10 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Category;
-use App\Models\Image;
 use App\Models\User;
-use App\Models\Video;
+
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -16,10 +14,10 @@ class DashboardController extends Controller
         $title = 'Dashboard';
         $page = 'admin.dashboard';
 
-        $totalCategory = Category::count();
-        $totalVideo = Video::count();
-        $totalImage = Image::count();
-        $totalUser = User::count();
+        $totalCategory = 1;
+        $totalVideo = 1;
+        $totalImage = 2;
+        $totalUser = 3;
 
         return view("layouts.admin.layout", compact(
             'title',
