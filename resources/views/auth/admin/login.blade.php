@@ -11,7 +11,7 @@
                                 <img src="{{ asset('assets/admin/images/logos/logo.svg') }}" alt="">
                             </a>
                             <p class="text-center">Your Social Campaigns</p>
-                            <form action="{{ route('admin.login') }}" method="POST" id="admin_login_form">
+                            <form action="{{ route('admin.checkLogin') }}" method="POST" id="admin_login_form">
                                 @csrf
                                 <div class="mb-3">
                                     <label for="exampleInputEmail1" class="form-label">email</label>

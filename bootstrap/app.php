@@ -5,6 +5,8 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\AdminAuth;
 use App\Http\Middleware\CheckUser;
+use App\Http\Middleware\NoCache;
+use App\Http\Middleware\RedirectIfAuthenticated;
 use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -32,6 +34,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'adminauth' => AdminAuth::class,
             'checkuser' => CheckUser::class,
+            'nocache' => NoCache::class,
+            'guest:admin'=>RedirectIfAuthenticated::class
         ]);
+
+        $middleware->appendToGroup('web', NoCache::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {})->create();

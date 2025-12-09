@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Auth;
 
 class AdminAuth
 {
@@ -17,11 +18,15 @@ class AdminAuth
      */
     public function handle(Request $request, Closure $next)
     {
-
-        if (Session::has('admin')) {
-            return $next($request);
+        if (!Auth::guard('admin')->check()) {
+            return redirect()->route('admin.login');
         }
 
-        return Redirect::to(URL::to('/admin'));
+        $response = $next($request);
+
+        return $response
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
     }
 }
