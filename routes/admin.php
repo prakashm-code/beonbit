@@ -41,7 +41,7 @@ Route::middleware(AdminAuth::class)->group(function () {
     Route::post('admin/plans_store', [PlanController::class, 'store'])->name('admin.plan_store');
     Route::get('admin/plans_edit/{id}', [PlanController::class, 'edit'])->name('admin.plan_edit');
     Route::post('admin/plans_update/{id}', [PlanController::class, 'update'])->name('admin.plan_update');
-    Route::delete('admin/plans_delete{id}', [PlanController::class, 'destroy'])->name('admin.plan_destroy');
+    Route::post('admin/plans_delete/{id}', [PlanController::class, 'destroy'])->name('admin.plan_destroy');
     Route::post('admin/plans_update_status', [PlanController::class, 'updateStatus'])->name('admin.plan_update_status');
 });
 

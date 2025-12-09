@@ -160,6 +160,7 @@ class PlanController extends Controller
      */
     public function destroy($id)
     {
+        $id=decrypt($id);
         $plan = Plan::findOrFail($id);
         $plan->delete();
 

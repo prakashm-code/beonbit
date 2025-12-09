@@ -38,11 +38,14 @@ class PlanDataTable extends DataTable
                         $query->where(function ($q) use ($keywords, $keyword) {
                             foreach ($keywords as $word) {
                                 $q->orWhere(function ($subQuery) use ($word) {
-                                    $subQuery->where('name', 'LIKE', "%{$word}%")
-                                        ->orWhere('max_amount', 'LIKE', "%{$word}%");
+                                    $subQuery->where('name', 'LIKE', "%{$word}%");
+                                        // ->orWhere('max_amount', 'LIKE', "%{$word}%");
                                 });
                             }
                             $q->orWhere('min_amount', 'LIKE', "%{$keyword}%");
+                            $q->orWhere('max_amount', 'LIKE', "%{$keyword}%");
+                            $q->orWhere('daily_roi', 'LIKE', "%{$keyword}%");
+                            $q->orWhere('days', 'LIKE', "%{$keyword}%");
                         });
                     }
                 }
@@ -87,14 +90,14 @@ class PlanDataTable extends DataTable
             ->addColumn('actions', function ($row) {
                 $cryptId = encrypt($row->id);
                 $template_delete = decrypt($cryptId);
-                $delete_url = route('admin.user_delete', $cryptId);
+                $delete_url = route('admin.plan_destroy', $cryptId);
                 $edit_url = route('admin.plan_edit', $cryptId);
 
                 return '<div class="action-icon" style="gap: 20px;display: flex">
                              <a class="" href="' .  $edit_url . '" title="Edit"><i class="ti ti-edit"></i></a>
                             <form id="delete_plan_form' . $template_delete . '" action="' . $delete_url . '" method="POST">' .
                     csrf_field() .
-                    '<button style="background:transparent;border:none;"     type="button" data-id="' . $template_delete . '" class="deleteButton-Icon delete_user"><i class="ti ti-trash"></i></button></form>
+                    '<button style="background:transparent;border:none;"     type="button" data-id="' . $template_delete . '" class="deleteButton-Icon delete_plan"><i class="ti ti-trash"></i></button></form>
                             </div>';
             })
 

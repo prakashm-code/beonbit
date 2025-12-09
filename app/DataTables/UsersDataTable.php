@@ -43,6 +43,8 @@ class UsersDataTable extends DataTable
                                 });
                             }
                             $q->orWhere('email', 'LIKE', "%{$keyword}%");
+                            $q->orWhere('phone', 'LIKE', "%{$keyword}%");
+                            $q->orWhere('country', 'LIKE', "%{$keyword}%");
                         });
                     }
                 }
@@ -55,6 +57,12 @@ class UsersDataTable extends DataTable
             })
             ->addColumn('email', function ($row) {
                 return $row->email;
+            })
+             ->addColumn('phone', function ($row) {
+                return $row->phone;
+            })
+             ->addColumn('country', function ($row) {
+                return $row->country;
             })
             ->addColumn('actions', function ($row) {
                 $cryptId = encrypt($row->id);
@@ -77,7 +85,7 @@ class UsersDataTable extends DataTable
                             </div>';
             })
 
-            ->rawColumns(['checkbox', 'name', 'created_at', 'actions']);
+            ->rawColumns(['checkbox', 'name','email', 'phone','country', 'actions']);
     }
 
     /**
@@ -91,6 +99,8 @@ class UsersDataTable extends DataTable
             0 => 'id',
             1 => 'name',
             2 => 'email',
+            3 => 'phone',
+            4 => 'country',
         ];
 
         $orderIndex = $request->input('order.0.column', 0);
@@ -138,8 +148,10 @@ class UsersDataTable extends DataTable
                 ->orderable(false)
                 ->searchable(false),
             Column::make('no')->title('No')->orderable(false),
-            Column::make('name')->orderable(true),
-            Column::make('email')->title('email')->orderable(true),
+            Column::make('name')->title('Name')->orderable(true),
+            Column::make('email')->title('Email')->orderable(true),
+            Column::make('phone')->title('Phone no')->orderable(true),
+            Column::make('country')->title('Country')->orderable(true),
             Column::make('actions')->title('Actions')->orderable(false),
         ];
     }

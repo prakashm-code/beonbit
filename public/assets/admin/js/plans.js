@@ -272,3 +272,83 @@ $(document).on('change', '.status-toggle', function () {
         }
     });
 });
+
+$(document).on("click", ".delete_plan", function () {
+    var id = $(this).data("id");
+    Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // alert();
+            $("#delete_plan_form" + id).submit();
+        }
+    });
+});
+
+function toggleDeleteButton() {
+    let anyChecked = $(".row-checkbox:checked").length > 0;
+
+    if (anyChecked) {
+        $("#delete-selected").show();
+    } else {
+        $("#delete-selected").hide();
+    }
+}
+
+$(document).on("change", ".row-checkbox", function () {
+    toggleDeleteButton();
+});
+
+$(document).on("change", "#select-all", function () {
+    $(".row-checkbox").prop("checked", this.checked);
+    toggleDeleteButton();
+});
+
+$("#select-all").on("click", function () {
+    $(".row-checkbox").prop("checked", this.checked);
+});
+
+$("#delete-selected").on("click", function () {
+    let ids = [];
+
+    $(".row-checkbox:checked").each(function () {
+        ids.push($(this).val());
+    });
+
+    if (ids.length === 0) {
+        toastr.success("Please select at least one user");
+        return;
+    }
+
+    Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: base_url + "/admin/delete_multiple_user",
+                type: "POST",
+                data: {
+                    ids: ids,
+                    _token: $('meta[name="csrf-token"]').attr("content"),
+                },
+                success: function (response) {
+                    $("#select-all").prop("checked", false);
+                    $("#delete-selected").css("display", "none");
+                    $("#users-table").DataTable().ajax.reload();
+                },
+            });
+        }
+    });
+});
