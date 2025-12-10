@@ -36,8 +36,6 @@ class AuthAdminController extends Controller
     }
     public function checkLogin(Request $request)
     {
-        // dd($req);
-
         $request->validate(
             [
                 'email' => 'required|email|exists:users,email',
@@ -76,7 +74,6 @@ class AuthAdminController extends Controller
 
         Session::put('admin', $sessionArray);
         Session::save();
-
         return redirect()->route('admin.dashboard')->with('msg_success', 'Login successful.');
     }
 

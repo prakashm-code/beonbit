@@ -17,7 +17,7 @@ use App\Models\WebPages;
 use Database\Factories\UserFactory;
 use Illuminate\Support\Facades\Session;
 
-Route::middleware(AdminAuth::class,NoCache::class)->group(function () {
+Route::middleware(AdminAuth::class, NoCache::class)->group(function () {
     Route::get('admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
     Route::get('admin/user', [UserController::class, 'index'])->name('admin.user');
@@ -46,27 +46,7 @@ Route::middleware(AdminAuth::class,NoCache::class)->group(function () {
     Route::post('admin/plans_update_status', [PlanController::class, 'updateStatus'])->name('admin.plan_update_status');
 
     Route::get('/admin/logout', [AuthAdminController::class, 'adminLogout'])->name('admin.logout');
-
 });
 
-// Route::get('/admin', function () {
-//     $title = 'Login';
-//     $page = 'auth.admin.login';
-//     $js = ['login'];
-
-//     return view("layouts.admin.auth_layout", compact(
-//         'title',
-//         'page',
-//         'js'
-//     ));
-// });
-
-// Route::middleware(['guest:admin'])->group(function () {
-    Route::get('/admin', [AuthAdminController::class, 'index'])->name('admin.login');
-    Route::post('/admin/login', [AuthAdminController::class, 'checkLogin'])->name('admin.checkLogin');
-// });
-// Route::controller(AuthAdminController::class)->group(function () {
-//         Route::get('/admin', 'index')->name('admin.login');
-
-//     Route::post('admin/login', 'checkLogin')->name('admin.checkLogin');
-// });
+Route::get('/admin', [AuthAdminController::class, 'index'])->name('admin.login');
+Route::post('/admin/login', [AuthAdminController::class, 'checkLogin'])->name('admin.checkLogin');
