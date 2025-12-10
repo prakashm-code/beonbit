@@ -11,20 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_plans', function (Blueprint $table) {
+        Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('plan_id');
-            $table->date('start_date');
-            $table->date('end_date');
-            $table->decimal('amount', 10, 2);
-            $table->decimal('daily_return_percent', 5, 2);
-            $table->enum('status', ['active', 'completed'])->default('active');
+            $table->enum('type', ['credit', 'debit']);
+            $table->decimal('amount', 12, 2);
+            $table->string('transaction_reference')->unique();
+            $table->string('description')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('plan_id')->references('id')->on('plans')->onDelete('cascade');
         });
     }
 
@@ -33,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_plans');
+        Schema::dropIfExists('transactions');
     }
 };
