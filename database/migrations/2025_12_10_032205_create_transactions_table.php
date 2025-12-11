@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->enum('type', ['credit', 'debit']);
             $table->decimal('amount', 12, 2);
+            $table->decimal('balance_after',12,2)->nullable();
             $table->string('transaction_reference')->unique();
             $table->string('description')->nullable();
             $table->timestamp('created_at')->useCurrent();

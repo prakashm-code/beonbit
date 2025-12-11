@@ -3,17 +3,21 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Plan extends Model
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'title',
+        'amount',
+        'daily_return_percent',
+        'duration_days',
+        'description',
+        'status'
     ];
+
+    public function userPlans(): HasMany
+    {
+        return $this->hasMany(UserPlan::class);
+    }
 }
