@@ -155,12 +155,14 @@ class PlanController extends Controller
         }
     }
 
+
+
     /**
      * Remove the specified resource from storage.
      */
     public function destroy($id)
     {
-        $id=decrypt($id);
+        $id = decrypt($id);
         $plan = Plan::findOrFail($id);
         $plan->delete();
 

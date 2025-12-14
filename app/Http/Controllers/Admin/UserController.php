@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
+use App\DataTables\UserPlanDataTable;
 
 class UserController extends Controller
 {
@@ -142,5 +143,13 @@ class UserController extends Controller
                 'message' => 'Error deleting users.'
             ]);
         }
+    }
+
+     public function UserPlans(UserPlanDataTable $DataTable)
+    {
+        $title = 'Plans';
+        $page = 'admin.user.user_plan_list';
+        $js = ['user'];
+        return $DataTable->render('layouts.admin.layout', compact('title', 'page', 'js'));
     }
 }
