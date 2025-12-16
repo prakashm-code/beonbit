@@ -35,7 +35,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'adminauth' => AdminAuth::class,
             'checkuser' => CheckUser::class,
             'nocache' => NoCache::class,
-            'guest:admin'=>RedirectIfAuthenticated::class
+            'guest:admin' => RedirectIfAuthenticated::class,
+            'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
+
         ]);
 
         $middleware->appendToGroup('web', NoCache::class);

@@ -6,7 +6,7 @@ use App\Http\Controllers\Api\ApiController;
 
 
 
-Route::get('/checkApi', [ApiController::class, 'checkApi']);
+Route::post('/login', [ApiController::class, 'login']);
 Route::post('/CompressVideo', [ApiController::class, 'CompressVideo']);
 Route::post('/CompressImage', [ApiController::class, 'CompressImage']);
 
