@@ -8,12 +8,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Plan extends Model
 {
     protected $fillable = [
-        'title',
-        'amount',
-        'daily_return_percent',
-        'duration_days',
+        'name',
         'description',
-        'status'
+        'min_amount',
+        'max_amount',
+        'daily_roi',
+        'total_return',
+        'status',
+        'type'
     ];
 
     public function userPlans(): HasMany

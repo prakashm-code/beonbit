@@ -18,17 +18,14 @@ class PlanController extends Controller
      */
     public function index()
     {
-        $plans = Plan::where('is_active', 1)->get();
-
+        $plans = Plan::where('status', '1')->get();
         return response()->json([
             'status' => true,
             'plans'  => PlanResource::collection($plans),
         ]);
     }
 
-    /**
-     * Show single plan
-     */
+
     public function show(Plan $plan)
     {
         if (!$plan->is_active) {

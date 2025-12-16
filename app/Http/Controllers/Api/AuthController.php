@@ -96,16 +96,19 @@ class AuthController extends Controller
         return new UserResource($user);
     }
 
+
     public function logout()
     {
         /** @var User $user */
         $user = Auth::user();
 
-        if ($user && $user->currentAccessToken()) {
-            $user->currentAccessToken()->revoke();
+        if ($user && $token = $user->currentAccessToken()) {
+            $user->tokens()->where('id', $token->id)->delete();
         }
-
-        return response()->json(['message' => 'Logged out']);
+        return response()->json([
+            'status' => true,
+            'message' => 'Logged out successfully'
+        ]);
     }
 
     public function dashboard()
