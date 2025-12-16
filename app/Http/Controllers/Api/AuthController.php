@@ -10,66 +10,83 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Validator;
+
 class AuthController extends Controller
 {
-    public function register(Request $r)
+    public function register(Request $request)
     {
-        $r->validate([
-            'name'          => 'required',
-            'email'         => 'required|email|unique:users',
-            'password'      => 'required|min:6',
-            'referrer_code' => 'nullable',
+        $validator = Validator::make($request->all(), [
+            'name'          => 'required|string|max:255',
+            'email'         => 'required|email|unique:users,email',
+            // 'password'      => 'required|string|min:6|confirmed',
+            'password'      => 'required|string|min:6',
+            'referrer_code' => 'nullable|exists:users,id',
         ]);
 
-        $data = $r->only('name', 'email', 'password');
-        $data['password'] = Hash::make($data['password']);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'errors' => $validator->errors()
+            ], 200);
+        }
 
-        $user = User::create($data);
-        $user->wallet()->create(['balance' => 0]);
-        if ($r->referrer_code) {
-            $ref = User::find($r->referrer_code);
+        $user = User::create([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        if (method_exists($user, 'wallet')) {
+            $user->wallet()->create(['balance' => 0]);
+        }
+
+        if ($request->referrer_code) {
+            $ref = User::find($request->referrer_code);
             if ($ref) {
                 $user->referrer_id = $ref->id;
                 $user->save();
             }
         }
+
+        $token = $user->createToken('Personal Access Token')->accessToken;
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Registration successful',
+            'user'   => new UserResource($user),
+        ], 200);
+    }
+
+
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email'    => 'required|email',
+            'password' => 'required',
+        ]);
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            throw ValidationException::withMessages([
+                'email' => ['Invalid credentials'],
+            ]);
+        }
+
+        $user = Auth::user();
+        DB::table('oauth_access_tokens')
+            ->where('user_id', $user->id)
+            ->update([
+                'revoked' => true
+            ]);
+
         $token = $user->createToken('api-token')->accessToken;
 
         return response()->json([
-            'token' => $token,
-            'user'  => new UserResource($user),
-        ], 201);
-    }
-
-
- public function login(Request $request)
-{
-    $request->validate([
-        'email'    => 'required|email',
-        'password' => 'required',
-    ]);
-    if (!Auth::attempt($request->only('email', 'password'))) {
-        throw ValidationException::withMessages([
-            'email' => ['Invalid credentials'],
+            'status'  => true,
+            'message' => 'Login successful',
+            'token'   => $token,
+            'user'    => $user,
         ]);
     }
-
-    $user = Auth::user();
-    DB::table('oauth_access_tokens')
-        ->where('user_id', $user->id)
-        ->update([
-            'revoked' => true
-        ]);
-
-    $token = $user->createToken('api-token')->accessToken;
-
-    return response()->json([
-        'status'  => true,
-        'message' => 'Login successful',
-        'token'   => $token,
-        'user'    => $user,
-    ]);
-}
 
     public function me()
     {
