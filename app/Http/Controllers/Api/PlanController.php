@@ -26,9 +26,11 @@ class PlanController extends Controller
     }
 
 
-    public function show(Plan $plan)
+    public function show($id)
     {
-        if (!$plan->is_active) {
+        $plan = Plan::find($id);
+
+        if (!$plan || !$plan->status) {
             return response()->json([
                 'status' => false,
                 'message' => 'Plan not available'
@@ -41,16 +43,32 @@ class PlanController extends Controller
         ]);
     }
 
-    public function subscribe(Request $request, Plan $plan)
+
+    public function subscribe(Request $request)
     {
         $request->validate([
-            'amount' => 'nullable|numeric|min:1',
+            'plan_id' => 'required|exists:plans,id',
+            'amount'  => 'nullable|numeric|min:1',
         ]);
 
-        $user = Auth::user();
+        $user = Auth::guard('api')->user();
+
+        $plan = Plan::where('id', $request->plan_id)
+            ->where('status', "1")
+            ->first();
+
+        if (!$plan) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Plan not available'
+            ], 404);
+        }
+
+        // Determine amount
         $amount = $request->amount ?? $plan->price;
 
-        if ($user->wallet->balance < $amount) {
+        // Wallet balance check
+        if ($user->wallet_balance < $amount) {
             return response()->json([
                 'status'  => false,
                 'message' => 'Insufficient balance'
@@ -59,34 +77,37 @@ class PlanController extends Controller
 
         try {
             DB::transaction(function () use ($user, $plan, $amount) {
-                $user->wallet->decrement('balance', $amount);
+
+                $user->wallet_balance = $user->wallet_balance - $amount;
 
                 UserPlan::create([
-                    'user_id' => $user->id,
-                    'plan_id' => $plan->id,
-                    'amount' => $amount,
-                    'started_at' => now(),
-                    'ends_at' => now()->addDays($plan->duration_days),
-                    'status' => 'active',
+                    'user_id'    => $user->id,
+                    'plan_id'    => $plan->id,
+                    'amount'     => $amount,
+                    'start_date' => now(),
+                    'end_date'    => now()->addDays($plan->duration_days),
+                    "daily_return_percent"=>$plan->daily_roi,
+                    'status'     => 'active',
                 ]);
 
                 Transaction::create([
-                    'user_id' => $user->id,
-                    'type' => 'subscribe',
-                    'amount' => 100,
-                    'balance_after' => 500,
+                    'user_id'        => $user->id,
+                    'type'           => 'debit',
+                    'amount'         => $amount,
+                    'balance_after'  => $user->wallet_balance,
+                    'transaction_reference'=>'pay'
                 ]);
             });
 
             return response()->json([
                 'status'  => true,
                 'message' => 'Successfully subscribed to plan'
-            ]);
+            ], 201);
         } catch (\Exception $e) {
             return response()->json([
                 'status'  => false,
                 'message' => 'Subscription failed',
-                'error'   => $e->getMessage(),
+                'error'   => $e->getMessage()
             ], 500);
         }
     }

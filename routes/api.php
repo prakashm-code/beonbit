@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\checkUser;
 use App\Http\Controllers\Api\ApiController;
 use App\Http\Controllers\Api\PlanController;
+use App\Http\Controllers\Api\DepositController;
 use App\Http\Controllers\API\AuthController;
 
 Route::post('/login', [AuthController::class, 'login']);
@@ -13,5 +14,9 @@ Route::post('/CompressImage', [ApiController::class, 'CompressImage']);
 
 Route::group(['middleware' => checkUser::class], function () {
     Route::get('/get_plan', [PlanController::class, 'index']);
+    Route::get('plans/{id}', [PlanController::class, 'show']);
+    Route::post('/plan_subscribe', [PlanController::class, 'subscribe']);
+    Route::post('/deposite', [DepositController::class, 'request']);
+    Route::get('/deposite_history', [DepositController::class, 'history']);
 
 });
