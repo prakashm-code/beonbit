@@ -102,7 +102,7 @@ class PlanController extends Controller
             return response()->json([
                 'status'  => true,
                 'message' => 'Successfully subscribed to plan'
-            ], 201);
+            ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'status'  => false,

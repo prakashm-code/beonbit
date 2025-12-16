@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WithdrawRequest extends Model
 {
-    protected $table = 'withdraw_requests';
+    protected $table = 'withdrawals';
 
     protected $fillable = [
         'user_id',

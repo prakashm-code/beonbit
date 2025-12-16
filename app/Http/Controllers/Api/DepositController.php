@@ -19,7 +19,7 @@ class DepositController extends Controller
             'status' => 'pending',
             'meta' =>  $r->method
         ]);
-        return response()->json(['message' => 'Deposit requested', 'deposit' => $d], 201);
+        return response()->json(['message' => 'Deposit requested', 'deposit' => $d], 200);
     }
 
     public function history()
