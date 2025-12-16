@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\VideoController;
 use App\Http\Controllers\Admin\VideoStreamController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\PlanController;
+use App\Http\Controllers\admin\TransactionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\AdminAuth;
 use App\Http\Middleware\NoCache;
@@ -37,6 +38,8 @@ Route::middleware(AdminAuth::class, NoCache::class)->group(function () {
     Route::get('admin/privacy_policy', [PrivacyPolicyController::class, 'index'])->name('admin.privacy_policy');
     Route::post('admin/privacy_policy_store', [PrivacyPolicyController::class, 'store'])->name('admin.privacy_policy_store');
     Route::post('admin/privacy_policy_edit', [PrivacyPolicyController::class, 'edit'])->name('admin.privacy_policy_edit');
+
+    Route::get('admin/transactions', [TransactionController::class, 'index'])->name('admin.transaction');
 
     Route::get('admin/plans', [PlanController::class, 'index'])->name('admin.plan_index');
     Route::get('admin/plans_create', [PlanController::class, 'create'])->name('admin.plan_create');

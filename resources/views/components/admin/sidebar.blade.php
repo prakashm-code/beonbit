@@ -40,6 +40,13 @@
                     </a>
                 </li>
                 <li class="sidebar-item">
+                    <a class="sidebar-link {{ in_array(Request::segment(2), ['transactions']) ? 'active' : '' }}"
+                        href="{{ route('admin.transaction') }}" aria-expanded="false">
+                        <i class="ti ti-user-circle"></i>
+                        <span class="hide-menu">Transactions</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
                     <a class="sidebar-link justify-content-between has-arrow {{ in_array(Request::segment(2), ['term_conditions', 'privacy_policy', 'edit_user']) ? 'active' : '' }}"
                         href="javascript:void(0)" aria-expanded="false">
                         <div class="d-flex align-items-center gap-3">

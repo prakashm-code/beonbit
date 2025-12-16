@@ -11,6 +11,7 @@ use Yajra\DataTables\Html\Column;
 use Yajra\DataTables\Html\Editor\Editor;
 use Yajra\DataTables\Html\Editor\Fields;
 use Yajra\DataTables\Services\DataTable;
+use Illuminate\Http\Request;
 
 class TransactionsDataTable extends DataTable
 {
@@ -21,9 +22,66 @@ class TransactionsDataTable extends DataTable
      */
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
-        return (new EloquentDataTable($query))
-            ->addColumn('action', 'transactions.action')
-            ->setRowId('id');
+        $counter = 1;
+
+        return datatables()
+            ->eloquent($query)
+            ->addColumn('no', function () use (&$counter) {
+                return $counter++;
+            })
+            // ->filter(function ($query) {
+            //     if ($this->request->has('search')) {
+            //         $keyword = trim($this->request->get('search')['value']);
+            //         if ($keyword !== '') {
+            //             $keywords = explode(' ', $keyword);
+
+            //             $query->where(function ($q) use ($keywords, $keyword) {
+            //                 foreach ($keywords as $word) {
+            //                     $q->orWhere(function ($subQuery) use ($word) {
+            //                         $subQuery->where('name', 'LIKE', "%{$word}%");
+            //                         // ->orWhere('max_amount', 'LIKE', "%{$word}%");
+            //                     });
+            //                 }
+            //             });
+            //         }
+            //     }
+            // })
+            ->addColumn('checkbox', function ($row) {
+                return '<input type="checkbox" class="row-checkbox" value="' . $row->id . '">';
+            })
+            ->addColumn('email', function ($row) {
+                return $row->user->email;
+            })
+            ->addColumn('type', function ($row) {
+                return $row->type;
+            })
+            ->addColumn('amount', function ($row) {
+                return $row->amount;
+            })
+            ->addColumn('balance_after', function ($row) {
+                return $row->balance_after;
+            })
+            ->addColumn('transaction_reference', function ($row) {
+                return $row->transaction_reference;
+            })
+            ->addColumn('transaction_date', function ($row) {
+                return $row->created_at;
+            })
+
+            ->addColumn('actions', function ($row) {
+                $cryptId = encrypt($row->id);
+                $template_delete = decrypt($cryptId);
+                // $delete_url = route('admin.plan_destroy', $cryptId);
+                $delete_url = "";
+
+                return '<div class="action-icon" style="gap: 20px;display: flex">
+                            <form id="delete_plan_form' . $template_delete . '" action="' . $delete_url . '" method="POST">' .
+                    csrf_field() .
+                    '<button style="background:transparent;border:none;"     type="button" data-id="' . $template_delete . '" class="deleteButton-Icon delete_plan"><i class="ti ti-trash"></i></button></form>
+                            </div>';
+            })
+
+            ->rawColumns(['checkbox', 'email', 'type', 'amount', 'balance_after', 'transaction_reference', 'transaction_date', 'actions']);
     }
 
     /**
@@ -31,9 +89,29 @@ class TransactionsDataTable extends DataTable
      *
      * @return QueryBuilder<Transaction>
      */
-    public function query(Transaction $model): QueryBuilder
+    public function query(Transaction $model, Request $request): QueryBuilder
     {
-        return $model->newQuery();
+        $columns = [
+            0 => 'id',
+            1 => 'user_id',
+            2 => 'type',
+            3 => 'amount',
+            4 => 'balance_after',
+            5 => 'transaction_reference',
+            6 => 'transaction_date'
+        ];
+
+        $orderIndex = $request->input('order.0.column', 0);
+        $column = $columns[$orderIndex] ?? 'id';
+
+
+        $direction = 'desc';
+
+        if (isset($request->order[0]['dir']) && $request->order[0]['dir'] == 'asc') {
+            $direction = 'asc';
+        }
+
+        return Transaction::query()->with('user')->orderBy($column, $direction);
     }
 
     /**
@@ -42,19 +120,19 @@ class TransactionsDataTable extends DataTable
     public function html(): HtmlBuilder
     {
         return $this->builder()
-                    ->setTableId('transactions-table')
-                    ->columns($this->getColumns())
-                    ->minifiedAjax()
-                    ->orderBy(1)
-                    ->selectStyleSingle()
-                    ->buttons([
-                        Button::make('excel'),
-            Button::make('csv'),
-            Button::make('pdf'),
-            Button::make('print'),
-            Button::make('reset'),
-            Button::make('reload')
-                    ]);
+            ->setTableId('transactions-table')
+            ->columns($this->getColumns())
+            ->minifiedAjax()
+            ->orderBy(1)
+            ->selectStyleSingle()
+            ->buttons([
+                Button::make('excel'),
+                Button::make('csv'),
+                Button::make('pdf'),
+                Button::make('print'),
+                Button::make('reset'),
+                Button::make('reload')
+            ]);
     }
 
     /**
@@ -63,15 +141,20 @@ class TransactionsDataTable extends DataTable
     public function getColumns(): array
     {
         return [
-            Column::computed('action')
-                  ->exportable(false)
-                  ->printable(false)
-                  ->width(60)
-                  ->addClass('text-center'),
-            Column::make('id'),
-            Column::make('add your columns'),
-            Column::make('created_at'),
-            Column::make('updated_at'),
+
+            Column::make('checkbox')
+                ->title('<input type="checkbox" id="select-all">')
+                ->orderable(false)
+                ->searchable(false),
+            Column::make('no')->title('No')->orderable(false),
+            Column::make('email')->title('Email')->orderable(true),
+            Column::make('type')->title('Plan')->orderable(true),
+            Column::make('amount')->title('Amount')->orderable(false),
+            Column::make('end_date')->title('End Date')->orderable(false),
+            Column::make('balance_after')->title('Balance After')->orderable(false),
+            Column::make('transaction_reference')->title('Transaction Reference')->orderable(false),
+            Column::make('transaction_date')->title('Transaction Date')->orderable(false),
+            Column::make('actions')->title('Actions')->orderable(false)
         ];
     }
 
