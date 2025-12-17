@@ -8,11 +8,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Transaction extends Model
 {
     protected $fillable = [
-        'user_id',
+      'user_id',
         'type',
         'amount',
-        'description',
-        'transaction_reference'
+        'balance_after',
+        'transaction_reference',
+        'description'
     ];
 
     protected $casts = [
