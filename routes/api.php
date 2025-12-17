@@ -19,13 +19,14 @@ Route::group(['middleware' => checkUser::class], function () {
     Route::get('/get_plan', [PlanController::class, 'index']);
     Route::get('plans/{id}', [PlanController::class, 'show']);
     Route::post('/plan_subscribe', [PlanController::class, 'subscribe']);
+    Route::get('/user_plans', [PlanController::class, 'myPlans']);
 
     Route::post('/deposite', [DepositController::class, 'request']);
 
     Route::post('/add_wallet_balance', [WalletController::class, 'addMoney']);
     Route::get('/deposite_history', [DepositController::class, 'history']);
 
-    Route::post('/withdraw', [WithdrawalController::class, 'request']);
+    Route::post('/withdraw', [WithdrawalController::class, 'withdraw']);
 
     Route::get('/logout', [AuthController::class, 'logout']);
 

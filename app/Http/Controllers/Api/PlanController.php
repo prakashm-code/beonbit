@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\PlanResource;
-
+use Carbon\Carbon;
 class PlanController extends Controller
 {
     /**
@@ -81,13 +81,16 @@ class PlanController extends Controller
 
 
 
-            $dailyInterest = $plan->daily_roi;
+            $dailyReturnPercent = $plan->daily_roi;
+            $dailyInterestAmount = ($request->amount * $dailyReturnPercent) / 100;
 
             $userPlan = UserPlan::create([
                 'user_id'        => $user->id,
                 'plan_id'        => $plan->id,
                 'amount'         => $request->amount,
-                'daily_return_percent' => $dailyInterest,
+                'daily_return_percent' => $dailyReturnPercent,
+                'daily_interest' => $dailyInterestAmount,
+                'total_interest' => 0,
                 'start_date'     => now()->toDateString(),
                 'end_date'       => now()->addDays($plan->duration_days)->toDateString(),
                 'status'         => 'active'
@@ -138,5 +141,51 @@ class PlanController extends Controller
                 'error'   => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function myPlans()
+    {
+        $user = Auth::guard('api')->user();
+
+        $plans = UserPlan::where('user_id', $user->id)
+            ->with('plan')
+            ->orderBy('id', 'desc')
+            ->get()
+            ->map(function ($userPlan) {
+
+                $today = Carbon::today();
+                $start = Carbon::parse($userPlan->start_date);
+                $end   = Carbon::parse($userPlan->end_date);
+
+                // 🔹 Calculate running days safely
+                if ($today->gt($end)) {
+                    $daysCompleted = $end->diffInDays($start);
+                } else {
+                    $daysCompleted = max(0, $today->diffInDays($start));
+                }
+
+                // 🔹 Calculate interest till now
+                if ($userPlan->status === 'active') {
+                    $currentInterest = $daysCompleted * $userPlan->daily_interest_amount;
+                } else {
+                    $currentInterest = $userPlan->total_interest;
+                }
+
+                return [
+                    'user_plan_id'      => $userPlan->id,
+                    'plan_name'         => $userPlan->plan->name ?? '',
+                    'amount'            => (float) $userPlan->amount,
+                    'daily_interest'    => (float) $userPlan->daily_interest_amount,
+                    'total_interest'    => (float) $currentInterest,
+                    'start_date'        => $userPlan->start_date,
+                    'end_date'          => $userPlan->end_date,
+                    'status'            => $userPlan->status
+                ];
+            });
+
+        return response()->json([
+            'status' => 0,
+            'data' => $plans
+        ], 200);
     }
 }
