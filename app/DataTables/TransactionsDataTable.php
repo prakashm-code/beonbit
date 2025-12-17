@@ -150,7 +150,6 @@ class TransactionsDataTable extends DataTable
             Column::make('email')->title('Email')->orderable(true),
             Column::make('type')->title('Plan')->orderable(true),
             Column::make('amount')->title('Amount')->orderable(false),
-            Column::make('end_date')->title('End Date')->orderable(false),
             Column::make('balance_after')->title('Balance After')->orderable(false),
             Column::make('transaction_reference')->title('Transaction Reference')->orderable(false),
             Column::make('transaction_date')->title('Transaction Date')->orderable(false),

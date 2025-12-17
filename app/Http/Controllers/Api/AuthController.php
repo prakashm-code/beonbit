@@ -11,6 +11,7 @@ use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -21,7 +22,7 @@ class AuthController extends Controller
             'email'         => 'required|email|unique:users,email',
             // 'password'      => 'required|string|min:6|confirmed',
             'password'      => 'required|string|min:6',
-            'referrer_code' => 'nullable|exists:users,id',
+            'referral_code' => 'nullable|exists:users,referral_code'
         ]);
 
         if ($validator->fails()) {
@@ -31,30 +32,36 @@ class AuthController extends Controller
             ], 200);
         }
 
+
+        $referrer = null;
+        if ($request->referral_code) {
+            $referrer = User::where('referral_code', $request->referral_code)->first();
+        }
         $user = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
+            'referral_code' => strtoupper(Str::random(8)),
+            'referred_by' => $referrer?->id
         ]);
 
-        if (method_exists($user, 'wallet')) {
-            $user->wallet()->create(['balance' => 0]);
-        }
-
-        if ($request->referrer_code) {
-            $ref = User::find($request->referrer_code);
-            if ($ref) {
-                $user->referrer_id = $ref->id;
-                $user->save();
-            }
-        }
+        Wallet::create([
+            'user_id' => $user->id,
+            'balance' => 0,
+            'locked_balance' => 0
+        ]);
 
         $token = $user->createToken('Personal Access Token')->accessToken;
 
         return response()->json([
             'status' => true,
             'message' => 'Registration successful',
-            'user'   => new UserResource($user),
+            'data' => [
+                'user_id' => $user->id,
+                'referral_code' => $user->referral_code,
+                'referred_by' => $user->referred_by,
+                'access_token' => $token
+            ]
         ], 200);
     }
 

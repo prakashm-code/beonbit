@@ -44,71 +44,58 @@ class PlanController extends Controller
     }
 
 
+
+
     public function subscribe(Request $request)
     {
         $request->validate([
             'plan_id' => 'required|exists:plans,id',
-            'amount'  => 'nullable|numeric|min:1',
+            'amount'  => 'required|numeric|min:1'
         ]);
 
-        $user = Auth::guard('api')->user();
+        $user = Auth::user();
 
         $plan = Plan::where('id', $request->plan_id)
-            ->where('status', "1")
-            ->first();
+            ->where('status', 1)
+            ->firstOrFail();
 
-        if (!$plan) {
+        // Amount range check
+        if ($request->amount < $plan->min_amount || $request->amount > $plan->max_amount) {
             return response()->json([
-                'status' => false,
-                'message' => 'Plan not available'
-            ], 404);
+                'message' => 'Invalid investment amount for this plan'
+            ], 422);
         }
 
-        // Determine amount
-        $amount = $request->amount ?? $plan->price;
+        $wallet = $user->wallet;
 
-        // Wallet balance check
-        if ($user->wallet_balance < $amount) {
+        if ($wallet->balance < $request->amount) {
             return response()->json([
-                'status'  => false,
-                'message' => 'Insufficient balance'
+                'message' => 'Insufficient wallet balance'
             ], 400);
         }
 
-        try {
-            DB::transaction(function () use ($user, $plan, $amount) {
+        DB::transaction(function () use ($request, $plan, $wallet, $user) {
 
-                $user->wallet_balance = $user->wallet_balance - $amount;
+            // Lock amount
+            $wallet->decrement('balance', $request->amount);
+            $wallet->increment('locked_balance', $request->amount);
 
-                UserPlan::create([
-                    'user_id'    => $user->id,
-                    'plan_id'    => $plan->id,
-                    'amount'     => $amount,
-                    'start_date' => now(),
-                    'end_date'    => now()->addDays($plan->duration_days),
-                    "daily_return_percent"=>$plan->daily_roi,
-                    'status'     => 'active',
-                ]);
+            $dailyInterest = ($request->amount * $plan->daily_interest_percent) / 100;
 
-                Transaction::create([
-                    'user_id'        => $user->id,
-                    'type'           => 'debit',
-                    'amount'         => $amount,
-                    'balance_after'  => $user->wallet_balance,
-                    'transaction_reference'=>'pay'
-                ]);
-            });
+            UserInvestment::create([
+                'user_id'        => $user->id,
+                'plan_id'        => $plan->id,
+                'amount'         => $request->amount,
+                'daily_interest' => $dailyInterest,
+                'total_interest' => 0,
+                'start_date'     => Carbon::today(),
+                'end_date'       => Carbon::today()->addDays($plan->duration_days),
+                'status'         => 'active'
+            ]);
+        });
 
-            return response()->json([
-                'status'  => true,
-                'message' => 'Successfully subscribed to plan'
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'Subscription failed',
-                'error'   => $e->getMessage()
-            ], 500);
-        }
+        return response()->json([
+            'message' => 'Investment purchased successfully'
+        ]);
     }
 }

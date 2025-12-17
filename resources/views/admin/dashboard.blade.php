@@ -273,9 +273,9 @@
                                     class="round rounded text-bg-danger d-flex align-items-center justify-content-center">
                                     <i class="ti ti-chart-donut-3"></i>
                                 </div>
-                                <h6 class="mb-0 ms-3">Videos</h6>
+                                <h6 class="mb-0 ms-3">Plans</h6>
                                 <div class="ms-auto text-danger d-flex align-items-center">
-                                    <h3 class="mb-0 fw-semibold fs-7">{{ $totalVideo }}</h3>
+                                    <h3 class="mb-0 fw-semibold fs-7">{{ $totalPlans }}</h3>
                                 </div>
                             </div>
                             <div class="d-flex align-items-center justify-content-between mt-4">
@@ -292,9 +292,9 @@
                                     class="round rounded text-bg-success d-flex align-items-center justify-content-center">
                                     <i class="ti ti-cards"></i>
                                 </div>
-                                <h6 class="mb-0 ms-3">Images</h6>
+                                <h6 class="mb-0 ms-3">Total Withdraw</h6>
                                 <div class="ms-auto text-info d-flex align-items-center">
-                                    <h3 class="mb-0 fw-semibold fs-7">{{ $totalImage }}</h3>
+                                    <h3 class="mb-0 fw-semibold fs-7">{{ $totalWithdraw }}</h3>
                                 </div>
                             </div>
                             <div class="d-flex align-items-center justify-content-between mt-4">
@@ -310,9 +310,9 @@
                                     class="round rounded text-bg-warning d-flex align-items-center justify-content-center">
                                     <i class="ti ti-layout-grid"></i>
                                 </div>
-                                <h6 class="mb-0 ms-3">Catgeories</h6>
+                                <h6 class="mb-0 ms-3">Total Deposite</h6>
                                 <div class="ms-auto text-info d-flex align-items-center">
-                                    <h3 class="mb-0 fw-semibold fs-7">{{ $totalCategory }}</h3>
+                                    <h3 class="mb-0 fw-semibold fs-7">{{ $totalDeposit }}</h3>
                                 </div>
                             </div>
                             <div class="d-flex align-items-center justify-content-between mt-4">

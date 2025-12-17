@@ -30,4 +30,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(\App\Models\Deposit::class);
     }
+    public function wallet()
+    {
+        return $this->hasOne(Wallet::class);
+    }
 }

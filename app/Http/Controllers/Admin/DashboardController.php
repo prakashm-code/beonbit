@@ -14,18 +14,18 @@ class DashboardController extends Controller
         $title = 'Dashboard';
         $page = 'admin.dashboard';
 
-        $totalCategory = 1;
-        $totalVideo = 1;
-        $totalImage = 2;
-        $totalUser = 3;
+        $totalUser = 1;
+        $totalPlans = 1;
+        $totalWithdraw = 2;
+        $totalDeposit = 3;
 
         return view("layouts.admin.layout", compact(
             'title',
             'page',
-            'totalCategory',
-            'totalVideo',
-            'totalImage',
             'totalUser',
+            'totalPlans',
+            'totalWithdraw',
+            'totalDeposit',
         ));
     }
 }
