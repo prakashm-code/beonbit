@@ -25,7 +25,6 @@ class AuthController extends Controller
             'password'      => 'required|string|min:6',
             'referral_code' => 'nullable|exists:users,referral_code'
         ]);
-
         if ($validator->fails()) {
             return response()->json([
                 'status' => false,
@@ -44,15 +43,12 @@ class AuthController extends Controller
                 'referral_code' => strtoupper(Str::random(8)),
                 'referred_by' => $referrer?->id
             ]);
-
             Wallet::create([
                 'user_id' => $user->id,
                 'balance' => 0,
                 'locked_balance' => 0
             ]);
-
             $token = $user->createToken('Personal Access Token')->accessToken;
-
             return response()->json([
                 'status' => true,
                 'message' => 'Registration successful',
