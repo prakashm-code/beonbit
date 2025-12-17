@@ -45,9 +45,6 @@ class PlanController extends Controller
         ]);
     }
 
-
-
-
     public function subscribe(Request $request)
     {
         $request->validate([
