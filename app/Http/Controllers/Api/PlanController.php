@@ -83,14 +83,14 @@ class PlanController extends Controller
         $wallet->locked_balance += $request->amount;
         $wallet->save();
 
-        $dailyInterest = ($request->amount * $plan->daily_interest_percent) / 100;
+        $dailyInterest = $plan->daily_roi;
 
         $userPlan = UserPlan::create([
             'user_id'        => $user->id,
             'plan_id'        => $plan->id,
             'amount'         => $request->amount,
-            'daily_interest' => $dailyInterest,
-            'total_interest' => 0,
+            'daily_return_percent' => $dailyInterest,
+            // 'total_interest' => 0,
             'start_date'     => now()->toDateString(),
             'end_date'       => now()->addDays($plan->duration_days)->toDateString(),
             'status'         => 'active'
