@@ -37,4 +37,19 @@ class User extends Authenticatable
     {
         return $this->hasOne(Wallet::class);
     }
+    public function referrer()
+    {
+        return $this->belongsTo(User::class, 'referred_by');
+    }
+
+
+    public function userPlans()
+    {
+        return $this->hasMany(UserPlan::class);
+    }
+
+    public function referralEarnings()
+    {
+        return $this->hasMany(ReferralCommission::class, 'referrer_id');
+    }
 }

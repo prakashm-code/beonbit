@@ -4,8 +4,10 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Plan;
-use App\Models\UserPlan;
 use App\Models\Transaction;
+use App\Models\UserPlan;
+use App\Models\Wallet;
+use App\Models\ReferralEarning;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -53,49 +55,65 @@ class PlanController extends Controller
             'amount'  => 'required|numeric|min:1'
         ]);
 
-        $user = Auth::user();
+        $user = Auth::guard('api')->user();
 
         $plan = Plan::where('id', $request->plan_id)
             ->where('status', 1)
             ->firstOrFail();
 
-        // Amount range check
         if ($request->amount < $plan->min_amount || $request->amount > $plan->max_amount) {
             return response()->json([
-                'message' => 'Invalid investment amount for this plan'
-            ], 422);
+                'status' => 1,
+                'message' => 'Invalid amount for this plan'
+            ], 500);
         }
 
         $wallet = $user->wallet;
 
         if ($wallet->balance < $request->amount) {
             return response()->json([
+                'status' => 1,
                 'message' => 'Insufficient wallet balance'
-            ], 400);
+            ], 500);
         }
 
-        DB::transaction(function () use ($request, $plan, $wallet, $user) {
+        $wallet = $user->wallet;
 
-            // Lock amount
-            $wallet->decrement('balance', $request->amount);
-            $wallet->increment('locked_balance', $request->amount);
+        $wallet->balance -= $request->amount;
+        $wallet->locked_balance += $request->amount;
+        $wallet->save();
 
-            $dailyInterest = ($request->amount * $plan->daily_interest_percent) / 100;
+        $dailyInterest = ($request->amount * $plan->daily_interest_percent) / 100;
 
-            UserInvestment::create([
-                'user_id'        => $user->id,
-                'plan_id'        => $plan->id,
-                'amount'         => $request->amount,
-                'daily_interest' => $dailyInterest,
-                'total_interest' => 0,
-                'start_date'     => Carbon::today(),
-                'end_date'       => Carbon::today()->addDays($plan->duration_days),
-                'status'         => 'active'
+        $userPlan = UserPlan::create([
+            'user_id'        => $user->id,
+            'plan_id'        => $plan->id,
+            'amount'         => $request->amount,
+            'daily_interest' => $dailyInterest,
+            'total_interest' => 0,
+            'start_date'     => now()->toDateString(),
+            'end_date'       => now()->addDays($plan->duration_days)->toDateString(),
+            'status'         => 'active'
+        ]);
+
+        if ($user->referred_by) {
+
+            $commission = ($request->amount * 5) / 100; // 5%
+
+            Wallet::where('user_id', $user->referred_by)
+                ->increment('balance', $commission);
+
+            ReferralEarning::create([
+                'referrer_id'      => $user->referred_by,
+                'referred_user_id' => $user->id,
+                'user_plan_id'     => $userPlan->id,
+                'amount'           => $commission
             ]);
-        });
+        }
 
         return response()->json([
-            'message' => 'Investment purchased successfully'
-        ]);
+            'status' => 0,
+            'message' => 'Plan purchased successfully'
+        ], 200);
     }
 }

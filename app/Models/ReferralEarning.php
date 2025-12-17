@@ -5,28 +5,26 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+
+
 class ReferralEarning extends Model
 {
-    protected $table = 'referral_earnings';
-
     protected $fillable = [
-        'user_id',
-        'referred_user_id',
-        'level',
-        'amount'
+        'referrer_id','referred_user_id','user_plan_id','amount'
     ];
 
-    protected $casts = [
-        'amount' => 'decimal:2'
-    ];
-
-    public function user(): BelongsTo
+    public function referrer()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class,'referrer_id');
     }
 
-    public function referredUser(): BelongsTo
+    public function referredUser()
     {
-        return $this->belongsTo(User::class, 'referred_user_id');
+        return $this->belongsTo(User::class,'referred_user_id');
+    }
+
+    public function userPlan()
+    {
+        return $this->belongsTo(UserPlan::class,'user_plan_id');
     }
 }
