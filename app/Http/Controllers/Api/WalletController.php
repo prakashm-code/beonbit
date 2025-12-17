@@ -27,6 +27,15 @@ class WalletController extends Controller
         $userWallet->balance += $request->amount;
         $userWallet->save();
 
+        Transaction::create([
+            'user_id' => $user->id,
+            'type' => 'credit',
+            'amount' => $request->amount,
+            'balance_after' => $userWallet->balance,
+            'transaction_reference' => 'TOPUP',
+            'description' => 'Wallet top-up'
+        ]);
+
         return response()->json([
             'status'  => true,
             'message' => 'Money added successfully',

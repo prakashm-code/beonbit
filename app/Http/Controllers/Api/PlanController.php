@@ -82,6 +82,8 @@ class PlanController extends Controller
             $wallet->locked_balance += $request->amount;
             $wallet->save();
 
+
+
             $dailyInterest = $plan->daily_roi;
 
             $userPlan = UserPlan::create([
@@ -94,16 +96,37 @@ class PlanController extends Controller
                 'status'         => 'active'
             ]);
 
+            Transaction::create([
+                'user_id' => $user->id,
+                'type' => 'debit',
+                'amount' => $request->amount,
+                'balance_after' => $wallet->balance,
+                'transaction_reference' => 'PLAN-' . $userPlan->id,
+                'description' => 'Plan purchase'
+            ]);
+
             if ($user->referred_by) {
+
                 $commission = ($request->amount * 5) / 100;
-                Wallet::where('user_id', $user->referred_by)
-                    ->increment('balance', $commission);
-                ReferralEarning::create([
-                    'referrer_id'      => $user->referred_by,
-                    'referred_user_id' => $user->id,
-                    'user_plan_id'     => $userPlan->id,
-                    'amount'           => $commission
-                ]);
+                $referrerWallet = Wallet::where('user_id', $user->referred_by)->first();
+                if ($referrerWallet) {
+                    $referrerWallet->balance += $commission;
+                    $referrerWallet->save();
+                    ReferralEarning::create([
+                        'referrer_id'      => $user->referred_by,
+                        'referred_user_id' => $user->id,
+                        'user_plan_id'     => $userPlan->id,
+                        'amount'           => $commission
+                    ]);
+                    Transaction::create([
+                        'user_id' => $user->referred_by,
+                        'type' => 'credit',
+                        'amount' => $commission,
+                        'balance_after' => $referrerWallet->balance,
+                        'transaction_reference' => 'REF-' . $userPlan->id,
+                        'description' => 'Referral commission'
+                    ]);
+                }
             }
             DB::commit();
             return response()->json([
