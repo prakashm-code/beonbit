@@ -32,38 +32,44 @@ class AuthController extends Controller
                 'errors' => $validator->errors()
             ], 200);
         }
+        try {
+            $referrer = null;
+            if ($request->referral_code) {
+                $referrer = User::where('referral_code', $request->referral_code)->first();
+            }
+            $user = User::create([
+                'name'     => $request->name,
+                'email'    => $request->email,
+                'password' => Hash::make($request->password),
+                'referral_code' => strtoupper(Str::random(8)),
+                'referred_by' => $referrer?->id
+            ]);
 
-
-        $referrer = null;
-        if ($request->referral_code) {
-            $referrer = User::where('referral_code', $request->referral_code)->first();
-        }
-        $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'referral_code' => strtoupper(Str::random(8)),
-            'referred_by' => $referrer?->id
-        ]);
-
-        Wallet::create([
-            'user_id' => $user->id,
-            'balance' => 0,
-            'locked_balance' => 0
-        ]);
-
-        $token = $user->createToken('Personal Access Token')->accessToken;
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Registration successful',
-            'data' => [
+            Wallet::create([
                 'user_id' => $user->id,
-                'referral_code' => $user->referral_code,
-                'referred_by' => $user->referred_by,
-                'access_token' => $token
-            ]
-        ], 200);
+                'balance' => 0,
+                'locked_balance' => 0
+            ]);
+
+            $token = $user->createToken('Personal Access Token')->accessToken;
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Registration successful',
+                'data' => [
+                    'user_id' => $user->id,
+                    'referral_code' => $user->referral_code,
+                    'referred_by' => $user->referred_by,
+                    'access_token' => $token
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Withdrawal request failed',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
     }
 
 
