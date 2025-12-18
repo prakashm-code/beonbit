@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\PlanResource;
+use App\Models\ReferralEarning;
 
 class WalletController extends Controller
 {
@@ -57,6 +58,29 @@ class WalletController extends Controller
                 'transaction_reference' => 'TOPUP',
                 'description' => 'Wallet top-up'
             ]);
+
+            if ($user->referred_by) {
+                $commission = ($request->amount * 5) / 100;
+                $referrerWallet = Wallet::where('user_id', $user->referred_by)->first();
+                if ($referrerWallet) {
+                    $referrerWallet->balance += $commission;
+                    $referrerWallet->save();
+                    ReferralEarning::create([
+                        'referrer_id'      => $user->referred_by,
+                        'referred_user_id' => $user->id,
+                        // 'user_plan_id'     => $userPlan->id,
+                        'amount'           => $commission
+                    ]);
+                    Transaction::create([
+                        'user_id' => $user->referred_by,
+                        'type' => 'credit',
+                        'amount' => $commission,
+                        'balance_after' => $referrerWallet->balance,
+                        'transaction_reference' => 'REFFERAL',
+                        'description' => 'Referral commission'
+                    ]);
+                }
+            }
             DB::commit();
 
             return response()->json([
@@ -94,7 +118,7 @@ class WalletController extends Controller
 
         return response()->json([
             'status' => 0,
-            "message"=>"All transaction",
+            "message" => "All transaction",
             'data' => $transactions
         ], 200);
     }

@@ -21,12 +21,58 @@ class PlanController extends Controller
      */
     public function index()
     {
-        $plans = Plan::where('status', '1')->get();
+        $plans = Plan::select(
+            'id',
+            'name',
+            'description',
+            'min_amount',
+            'max_amount',
+            'daily_roi',
+            'duration_days',
+            'total_return',
+            'status',
+            'type'
+        )
+            ->where('status', '1')
+            ->get()
+            ->map(function ($plan) {
+
+                // convert status
+                $plan->status = $plan->status == '1' ? 'active' : 'inactive';
+
+                // convert type
+                switch ($plan->type) {
+                    case '1':
+                        $plan->type = 'basic';
+                        break;
+                    case '2':
+                        $plan->type = 'advanced';
+                        break;
+                    case '3':
+                        $plan->type = 'premium';
+                        break;
+                    case '4':
+                        $plan->type = 'expert';
+                        break;
+                    case '5':
+                        $plan->type = 'master';
+                        break;
+                    case '6':
+                        $plan->type = 'professional';
+                        break;
+                    default:
+                        $plan->type = 'unknown';
+                }
+
+                return $plan;
+            });
+
         return response()->json([
             'status' => 0,
-            'plans'  => PlanResource::collection($plans),
-        ]);
+            'plans'  => $plans
+        ], 200);
     }
+
 
 
     public function show($id)
@@ -116,29 +162,7 @@ class PlanController extends Controller
                 'description' => 'Plan purchase'
             ]);
 
-            if ($user->referred_by) {
 
-                $commission = ($request->amount * 5) / 100;
-                $referrerWallet = Wallet::where('user_id', $user->referred_by)->first();
-                if ($referrerWallet) {
-                    $referrerWallet->balance += $commission;
-                    $referrerWallet->save();
-                    ReferralEarning::create([
-                        'referrer_id'      => $user->referred_by,
-                        'referred_user_id' => $user->id,
-                        'user_plan_id'     => $userPlan->id,
-                        'amount'           => $commission
-                    ]);
-                    Transaction::create([
-                        'user_id' => $user->referred_by,
-                        'type' => 'credit',
-                        'amount' => $commission,
-                        'balance_after' => $referrerWallet->balance,
-                        'transaction_reference' => 'REF-' . $userPlan->id,
-                        'description' => 'Referral commission'
-                    ]);
-                }
-            }
             DB::commit();
             return response()->json([
                 'status' => 0,
