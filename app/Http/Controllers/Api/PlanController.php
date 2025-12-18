@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\PlanResource;
 use Carbon\Carbon;
+
 class PlanController extends Controller
 {
     /**
@@ -22,7 +23,7 @@ class PlanController extends Controller
     {
         $plans = Plan::where('status', '1')->get();
         return response()->json([
-            'status' => true,
+            'status' => 0,
             'plans'  => PlanResource::collection($plans),
         ]);
     }
@@ -31,18 +32,28 @@ class PlanController extends Controller
     public function show($id)
     {
         $plan = Plan::find($id);
+        DB::beginTransaction();
+        try {
+            if (!$plan || !$plan->status) {
+                return response()->json([
+                    'status' => 1,
+                    'message' => 'Plan not available'
+                ], 404);
+            }
+            DB::commit();
 
-        if (!$plan || !$plan->status) {
             return response()->json([
-                'status' => false,
-                'message' => 'Plan not available'
-            ], 404);
+                'status' => 0,
+                'plan'   => new PlanResource($plan),
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status'  => 1,
+                'message' => 'Withdrawal request failed',
+                'error'   => $e->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'status' => true,
-            'plan'   => new PlanResource($plan),
-        ]);
     }
 
     public function subscribe(Request $request)
@@ -136,7 +147,7 @@ class PlanController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
-                'status'  => false,
+                'status'  => 1,
                 'message' => 'Withdrawal request failed',
                 'error'   => $e->getMessage()
             ], 500);
@@ -146,46 +157,55 @@ class PlanController extends Controller
     public function myPlans()
     {
         $user = Auth::guard('api')->user();
+        DB::beginTransaction();
 
-        $plans = UserPlan::where('user_id', $user->id)
-            ->with('plan')
-            ->orderBy('id', 'desc')
-            ->get()
-            ->map(function ($userPlan) {
+        try {
+            $plans = UserPlan::where('user_id', $user->id)
+                ->with('plan')
+                ->orderBy('id', 'desc')
+                ->get()
+                ->map(function ($userPlan) {
 
-                $today = Carbon::today();
-                $start = Carbon::parse($userPlan->start_date);
-                $end   = Carbon::parse($userPlan->end_date);
+                    $today = Carbon::today();
+                    $start = Carbon::parse($userPlan->start_date);
+                    $end   = Carbon::parse($userPlan->end_date);
 
-                // 🔹 Calculate running days safely
-                if ($today->gt($end)) {
-                    $daysCompleted = $end->diffInDays($start);
-                } else {
-                    $daysCompleted = max(0, $today->diffInDays($start));
-                }
+                    if ($today->gt($end)) {
+                        $daysCompleted = $end->diffInDays($start);
+                    } else {
+                        $daysCompleted = max(0, $today->diffInDays($start));
+                    }
 
-                // 🔹 Calculate interest till now
-                if ($userPlan->status === 'active') {
-                    $currentInterest = $daysCompleted * $userPlan->daily_interest_amount;
-                } else {
-                    $currentInterest = $userPlan->total_interest;
-                }
+                    if ($userPlan->status === 'active') {
+                        $currentInterest = $daysCompleted * $userPlan->daily_interest_amount;
+                    } else {
+                        $currentInterest = $userPlan->total_interest;
+                    }
 
-                return [
-                    'user_plan_id'      => $userPlan->id,
-                    'plan_name'         => $userPlan->plan->name ?? '',
-                    'amount'            => (float) $userPlan->amount,
-                    'daily_interest'    => (float) $userPlan->daily_interest_amount,
-                    'total_interest'    => (float) $currentInterest,
-                    'start_date'        => $userPlan->start_date,
-                    'end_date'          => $userPlan->end_date,
-                    'status'            => $userPlan->status
-                ];
-            });
+                    return [
+                        'user_plan_id'      => $userPlan->id,
+                        'plan_name'         => $userPlan->plan->name ?? '',
+                        'amount'            => (float) $userPlan->amount,
+                        'daily_interest'    => (float) $userPlan->daily_interest_amount,
+                        'total_interest'    => (float) $currentInterest,
+                        'start_date'        => $userPlan->start_date,
+                        'end_date'          => $userPlan->end_date,
+                        'status'            => $userPlan->status
+                    ];
+                });
+            DB::commit();
 
-        return response()->json([
-            'status' => 0,
-            'data' => $plans
-        ], 200);
+            return response()->json([
+                'status' => 0,
+                'data' => $plans
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status'  => 1,
+                'message' => 'Withdrawal request failed',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
     }
 }

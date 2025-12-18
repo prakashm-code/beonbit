@@ -87,9 +87,7 @@ class WithdrawalController extends Controller
                 ]
             ], 200);
         } catch (\Exception $e) {
-
             DB::rollBack();
-
             return response()->json([
                 'status' => 1,
                 'message' => 'Withdrawal failed',

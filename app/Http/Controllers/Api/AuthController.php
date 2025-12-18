@@ -27,10 +27,12 @@ class AuthController extends Controller
         ]);
         if ($validator->fails()) {
             return response()->json([
-                'status' => false,
+                'status' => 1,
                 'errors' => $validator->errors()
             ], 200);
         }
+        DB::beginTransaction();
+
         try {
             $referrer = null;
             if ($request->referral_code) {
@@ -49,19 +51,22 @@ class AuthController extends Controller
                 'locked_balance' => 0
             ]);
             $token = $user->createToken('Personal Access Token')->accessToken;
+
+            DB::commit();
             return response()->json([
-                'status' => true,
+                'status' => 0,
                 'message' => 'Registration successful',
                 'data' => [
                     'user_id' => $user->id,
                     'referral_code' => $user->referral_code,
                     'referred_by' => $user->referred_by,
-                    'access_token' => $token
+                    'access_token' => $token,
                 ]
             ], 200);
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
-                'status'  => false,
+                'status'  => 1,
                 'message' => 'Withdrawal request failed',
                 'error'   => $e->getMessage()
             ], 500);
@@ -82,23 +87,28 @@ class AuthController extends Controller
         }
 
         $user = Auth::user();
-        $walletbalance=Wallet::where('user_id',$user->id)->first();
+        $walletbalance = Wallet::where('user_id', $user->id)->first();
         DB::table('oauth_access_tokens')
             ->where('user_id', $user->id)
             ->update([
-                'revoked' => true
+                'revoked' => 0
             ]);
 
         $token = $user->createToken('api-token')->accessToken;
-
+        $active_plans      = $user->userPlans()->where('status', 'active')->count();
+        $total_transactions     = $user->transactions()->count();
+        $total_withdrawals  = $user->userPlans()->where('status', 'withdrawn')->sum('amount');
         return response()->json([
-            'status'  => true,
+            'status'  => 0,
             'message' => 'Login successful',
             'token'   => $token,
             'data' => [
                 'user_id' => $user->id,
                 'user' => $user,
-                'wallet_balance'=>$walletbalance->balance
+                'wallet_balance' => $walletbalance->balance,
+                'active_plans' => $active_plans,
+                'total_transactions' => $total_transactions,
+                'total_withdrawals' => $total_withdrawals,
             ]
         ]);
     }
@@ -121,7 +131,7 @@ class AuthController extends Controller
             $user->tokens()->where('id', $token->id)->delete();
         }
         return response()->json([
-            'status' => true,
+            'status' => 0,
             'message' => 'Logged out successfully'
         ]);
     }
@@ -133,8 +143,8 @@ class AuthController extends Controller
 
         return response()->json([
             'balance'            => $u->wallet->balance ?? 0,
-            'active_plans'       => $u->plans()->where('status', 'active')->count(),
-            'total_deposits'     => $u->deposits()->where('status', 'approved')->sum('amount'),
+            'active_plans'       => $u->userPlans()->where('status', 'active')->count(),
+            'total_deposits'     => $u->transactions()->count(),
             'total_withdrawals'  => $u->withdrawals()->where('status', 'approved')->sum('amount'),
         ]);
     }

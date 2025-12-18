@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\ApiController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\DepositController;
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\ReferralController;
 use App\Http\Controllers\API\WalletController;
 use App\Http\Controllers\API\WithdrawalController;
 
@@ -24,6 +25,11 @@ Route::group(['middleware' => checkUser::class], function () {
     Route::post('/deposite', [DepositController::class, 'request']);
 
     Route::post('/add_wallet_balance', [WalletController::class, 'addMoney']);
+    Route::get('/get_wallet_balance', [WalletController::class, 'getWallet']);
+
+    Route::get('/referral_earning', [ReferralController::class, 'earnings']);
+
+
     Route::get('/deposite_history', [DepositController::class, 'history']);
 
     Route::post('/withdraw', [WithdrawalController::class, 'withdraw']);
