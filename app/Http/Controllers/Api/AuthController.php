@@ -102,19 +102,27 @@ class AuthController extends Controller
         $active_plans      = $user->userPlans()->where('status', 'active')->count();
         $total_transactions     = $user->transactions()->count();
         $total_withdrawals  = $user->userPlans()->where('status', 'withdrawn')->sum('amount');
-        return response()->json([
-            'status'  => 0,
-            'message' => 'Login successful',
-            'token'   => $token,
-            'data' => [
-                'user_id' => $user->id,
-                'user' => $user,
-                'wallet_balance' => $walletbalance->balance,
-                'active_plans' => $active_plans,
-                'total_transactions' => $total_transactions,
-                'total_withdrawals' => $total_withdrawals,
-            ]
-        ]);
+
+        if ($user->role == "0") {
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Login successful',
+                'token'   => $token,
+                'data' => [
+                    'user_id' => $user->id,
+                    'user' => $user,
+                    'wallet_balance' => $walletbalance->balance,
+                    'active_plans' => $active_plans,
+                    'total_transactions' => $total_transactions,
+                    'total_withdrawals' => $total_withdrawals,
+                ]
+            ]);
+        } else {
+            return response()->json([
+                'status'  => 1,
+                'message' => 'Invalid user',
+            ]);
+        }
     }
 
     public function me()
