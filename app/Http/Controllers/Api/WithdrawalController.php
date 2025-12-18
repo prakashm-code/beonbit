@@ -14,10 +14,66 @@ use Illuminate\Support\Facades\Validator;
 
 class WithdrawalController extends Controller
 {
+    public function request(Request $request)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'transaction_method' => 'required|string'
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $user = Auth::guard('api')->user();
+            $wallet = Wallet::firstOrCreate(
+                ['user_id' => $user->id],
+                ['balance' => 0, 'locked_balance' => 0]
+            );
+
+            if ($wallet->balance < $request->amount) {
+                DB::rollBack();
+                return response()->json([
+                    'status' => 1,
+                    'message' => 'Insufficient wallet balance'
+                ], 400);
+            }
+
+            $wallet->balance -= $request->amount;
+            $wallet->locked_balance += $request->amount;
+            $wallet->save();
+
+            $withdrawal = WithdrawRequest::create([
+                'user_id' => $user->id,
+                'amount'  => $request->amount,
+                'method'  => $request->transaction_method,
+                'status'  => 'pending'
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 0,
+                'message' => 'Withdrawal request sent to admin',
+                'data' => [
+                    'withdrawal_id' => $withdrawal->id,
+                    'amount' => $withdrawal->amount,
+                    'status' => $withdrawal->status
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'Withdrawal request failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
     public function withdraw(Request $request)
     {
-           $validator = Validator::make($request->all(), [
-              'user_plan_id' => 'required|exists:user_plans,id'
+        $validator = Validator::make($request->all(), [
+            'user_plan_id' => 'required|exists:user_plans,id'
         ]);
         if ($validator->fails()) {
             return response()->json([

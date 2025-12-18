@@ -33,6 +33,14 @@
                     </a>
                 </li>
                 <li class="sidebar-item">
+                    <a class="sidebar-link {{ in_array(Request::segment(2), ['referral_setting']) ? 'active' : '' }}"
+                        href=" {{ route('admin.referral_setting') }}" aria-expanded="false">
+
+                        <i class="ti ti-user-circle"></i>
+                        <span class="hide-menu">Referral Setting</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
                     <a class="sidebar-link {{ in_array(Request::segment(2), ['user_plans']) ? 'active' : '' }}"
                         href="{{ route('admin.user_plan') }}" aria-expanded="false">
                         <i class="ti ti-user-circle"></i>

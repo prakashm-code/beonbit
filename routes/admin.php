@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\VideoStreamController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\admin\TransactionController;
+use App\Http\Controllers\admin\ReferralController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\AdminAuth;
 use App\Http\Middleware\NoCache;
@@ -48,6 +49,8 @@ Route::middleware(AdminAuth::class, NoCache::class)->group(function () {
     Route::post('admin/plans_update/{id}', [PlanController::class, 'update'])->name('admin.plan_update');
     Route::post('admin/plans_delete/{id}', [PlanController::class, 'destroy'])->name('admin.plan_destroy');
     Route::post('admin/plans_update_status', [PlanController::class, 'updateStatus'])->name('admin.plan_update_status');
+
+    Route::get('admin/referral_setting', [ReferralController::class, 'referralSetting'])->name('admin.referral_setting');
 
     Route::get('/admin/logout', [AuthAdminController::class, 'adminLogout'])->name('admin.logout');
 });
