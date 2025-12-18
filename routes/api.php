@@ -27,6 +27,7 @@ Route::group(['middleware' => checkUser::class], function () {
     Route::post('/add_wallet_balance', [WalletController::class, 'addMoney']);
     Route::get('/get_wallet_balance', [WalletController::class, 'getWallet']);
 
+    Route::get('/get_transactions', [WalletController::class, 'transactions']);
     Route::get('/referral_earning', [ReferralController::class, 'earnings']);
 
 

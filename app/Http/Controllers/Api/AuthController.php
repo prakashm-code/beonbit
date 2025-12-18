@@ -87,7 +87,10 @@ class AuthController extends Controller
         }
 
         $user = Auth::user();
-        $walletbalance = Wallet::where('user_id', $user->id)->first();
+        $walletbalance = $user->wallet()->firstOrCreate([
+            'balance' => 0,
+            'locked_balance' => 0
+        ]);
         DB::table('oauth_access_tokens')
             ->where('user_id', $user->id)
             ->update([
