@@ -51,6 +51,13 @@ Route::middleware(AdminAuth::class, NoCache::class)->group(function () {
     Route::post('admin/plans_update_status', [PlanController::class, 'updateStatus'])->name('admin.plan_update_status');
 
     Route::get('admin/referral_setting', [ReferralController::class, 'referralSetting'])->name('admin.referral_setting');
+    Route::get('admin/referral_setting_create', [ReferralController::class, 'create'])->name('admin.referral_setting_create');
+    Route::post('admin/referral_setting_store', [ReferralController::class, 'store'])->name('admin.referral_setting_store');
+    Route::get('admin/referral_setting_edit/{id}', [ReferralController::class, 'edit'])->name('admin.referral_setting_edit');
+    Route::post('admin/referral_setting_update/{id}', [ReferralController::class, 'update'])->name('admin.referral_setting_update');
+    Route::post('admin/referral_setting_delete/{id}', [ReferralController::class, 'destroy'])->name('admin.referral_setting_destroy');
+    Route::post('admin/referral_setting_update_status', [ReferralController::class, 'updateStatus'])->name('admin.referral_setting_update_status');
+
 
     Route::get('/admin/logout', [AuthAdminController::class, 'adminLogout'])->name('admin.logout');
 });

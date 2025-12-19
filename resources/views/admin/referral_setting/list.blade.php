@@ -6,7 +6,7 @@
                     <h5 class="card-title fw-semibold">Referral Setting List</h5>
                 </div>
                 <div>
-                    <a href="{{ route('admin.plan_create') }}" class="btn btn-primary">Add Commission +</a>
+                    <a href="{{ route('admin.referral_setting_create') }}" class="btn btn-primary">Add Commission +</a>
                 </div>
             </div>
             <div class="col-lg-12 d-flex align-items-stretch">
