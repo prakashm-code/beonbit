@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\admin\TransactionController;
 use App\Http\Controllers\admin\ReferralController;
+use App\Http\Controllers\admin\WithdrawController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\AdminAuth;
 use App\Http\Middleware\NoCache;
@@ -57,6 +58,8 @@ Route::middleware(AdminAuth::class, NoCache::class)->group(function () {
     Route::post('admin/referral_setting_update/{id}', [ReferralController::class, 'update'])->name('admin.referral_setting_update');
     Route::post('admin/referral_setting_delete/{id}', [ReferralController::class, 'destroy'])->name('admin.referral_setting_destroy');
     Route::post('admin/referral_setting_update_status', [ReferralController::class, 'updateStatus'])->name('admin.referral_setting_update_status');
+
+    Route::get('admin/withdraw_request', [WithdrawController::class, 'index'])->name('admin.withdraw_request');
 
 
     Route::get('/admin/logout', [AuthAdminController::class, 'adminLogout'])->name('admin.logout');

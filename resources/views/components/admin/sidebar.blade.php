@@ -35,7 +35,6 @@
                 <li class="sidebar-item">
                     <a class="sidebar-link {{ in_array(Request::segment(2), ['referral_setting']) ? 'active' : '' }}"
                         href=" {{ route('admin.referral_setting') }}" aria-expanded="false">
-
                         <i class="ti ti-user-circle"></i>
                         <span class="hide-menu">Referral Setting</span>
                     </a>
@@ -45,6 +44,13 @@
                         href="{{ route('admin.user_plan') }}" aria-expanded="false">
                         <i class="ti ti-user-circle"></i>
                         <span class="hide-menu">User Plans</span>
+                    </a>
+                </li>
+                  <li class="sidebar-item">
+                    <a class="sidebar-link {{ in_array(Request::segment(2), ['withdraw_request']) ? 'active' : '' }}"
+                        href=" {{ route('admin.withdraw_request') }}" aria-expanded="false">
+                        <i class="ti ti-user-circle"></i>
+                        <span class="hide-menu">Withdrawal Request</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
