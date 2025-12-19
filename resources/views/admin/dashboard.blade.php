@@ -15,16 +15,16 @@
                                     </div>
                                     <div class="d-flex align-items-center">
                                         <div class="border-end pe-4 border-muted border-opacity-10">
-                                            <h3 class="mb-1 fw-semibold fs-8 d-flex align-content-center">$2,340<i
+                                            {{-- <h3 class="mb-1 fw-semibold fs-8 d-flex align-content-center">$2,340<i
                                                     class="ti ti-arrow-up-right fs-5 lh-base text-success"></i>
                                             </h3>
-                                            <p class="mb-0 text-dark">Today’s Sales</p>
+                                            <p class="mb-0 text-dark">Today’s Sales</p> --}}
                                         </div>
                                         <div class="ps-4">
-                                            <h3 class="mb-1 fw-semibold fs-8 d-flex align-content-center">35%<i
+                                            {{-- <h3 class="mb-1 fw-semibold fs-8 d-flex align-content-center">35%<i
                                                     class="ti ti-arrow-up-right fs-5 lh-base text-success"></i>
                                             </h3>
-                                            <p class="mb-0 text-dark">Overall Performance</p>
+                                            <p class="mb-0 text-dark">Overall Performance</p> --}}
                                         </div>
                                     </div>
                                 </div>
@@ -46,7 +46,7 @@
                                 <div class="col-8">
                                     <h4 class="card-title mb-9 fw-semibold"> Total Transactions </h4>
                                     <div class="d-flex align-items-center mb-3">
-                                        <h4 class="fw-semibold mb-0 me-8">66</h4>
+                                        <h4 class="fw-semibold mb-0 me-8">{{ $totalTransaction }}</h4>
                                         <div class="d-flex align-items-center">
                                             <span
                                                 class="me-2 rounded-circle bg-success-subtle text-success round-20 d-flex align-items-center justify-content-center">
@@ -292,9 +292,9 @@
                                     class="round rounded text-bg-success d-flex align-items-center justify-content-center">
                                     <i class="ti ti-cards"></i>
                                 </div>
-                                <h6 class="mb-0 ms-3">Total Withdraw</h6>
+                                <h6 class="mb-0 ms-3">Total Withdraw Request</h6>
                                 <div class="ms-auto text-info d-flex align-items-center">
-                                    <h3 class="mb-0 fw-semibold fs-7">{{ $totalWithdraw }}</h3>
+                                    <h3 class="mb-0 fw-semibold fs-7">{{ $totalWithdrawRequest }}</h3>
                                 </div>
                             </div>
                             <div class="d-flex align-items-center justify-content-between mt-4">

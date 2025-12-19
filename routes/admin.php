@@ -60,6 +60,7 @@ Route::middleware(AdminAuth::class, NoCache::class)->group(function () {
     Route::post('admin/referral_setting_update_status', [ReferralController::class, 'updateStatus'])->name('admin.referral_setting_update_status');
 
     Route::get('admin/withdraw_request', [WithdrawController::class, 'index'])->name('admin.withdraw_request');
+    Route::post('admin/update_withdraw_status', [WithdrawController::class, 'updateStatus'])->name('admin.update_withdraw_status');
 
 
     Route::get('/admin/logout', [AuthAdminController::class, 'adminLogout'])->name('admin.logout');

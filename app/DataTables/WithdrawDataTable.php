@@ -56,13 +56,24 @@ class WithdrawDataTable extends DataTable
                 return $row->amount;
             })
             ->addColumn('status', function ($row) {
-                // return $row->status;
-                return '<select class="">
-                        <option value="'.$row->status.'">'.$row->status.'</option>
-                        <option value="Approve">Approve</option>
-                        <option value="Reject">Reject</option>
-                      </select>';
+
+                $statuses = ['pending', 'approved', 'reject'];
+
+                $html = '<select class="form-select withdrawal-status"
+                    data-id="' . $row->id . '">';
+
+                foreach ($statuses as $status) {
+                    $selected = $row->status === $status ? 'selected' : '';
+                    $html .= '<option value="' . $status . '" ' . $selected . '>'
+                        . ucfirst($status) .
+                        '</option>';
+                }
+
+                $html .= '</select>';
+
+                return $html;
             })
+
             ->addColumn('method', function ($row) {
                 return $row->method;
             })
