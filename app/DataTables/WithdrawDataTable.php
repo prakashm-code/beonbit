@@ -36,12 +36,18 @@ class WithdrawDataTable extends DataTable
                         $keywords = explode(' ', $keyword);
 
                         $query->where(function ($q) use ($keywords, $keyword) {
-                            foreach ($keywords as $word) {
-                                $q->orWhere(function ($subQuery) use ($word) {
-                                    $subQuery->where('level', 'LIKE', "%{$word}%");
-                                });
-                            }
-                            $q->orWhere('percentage', 'LIKE', "%{$keyword}%");
+                            // foreach ($keywords as $word) {
+                            //     $q->orWhere(function ($subQuery) use ($word) {
+                            //         $subQuery->where('level', 'LIKE', "%{$word}%");
+                            //     });
+                            // }
+                            $q->whereHas('user', function ($q) use ($keyword) {
+                                $q->where('email', 'LIKE', "%{$keyword}%");
+                            });
+                            $q->orWhere('amount', 'LIKE', "%{$keyword}%");
+                            $q->orWhere('status', 'LIKE', "%{$keyword}%");
+                            $q->orWhere('method', 'LIKE', "%{$keyword}%");
+                            $q->orWhere('created_at', 'LIKE', "%{$keyword}%");
                         });
                     }
                 }

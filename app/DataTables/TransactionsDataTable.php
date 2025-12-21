@@ -29,23 +29,30 @@ class TransactionsDataTable extends DataTable
             ->addColumn('no', function () use (&$counter) {
                 return $counter++;
             })
-            // ->filter(function ($query) {
-            //     if ($this->request->has('search')) {
-            //         $keyword = trim($this->request->get('search')['value']);
-            //         if ($keyword !== '') {
-            //             $keywords = explode(' ', $keyword);
+            ->filter(function ($query) {
+                if ($this->request->has('search')) {
+                    $keyword = trim($this->request->get('search')['value']);
+                    if ($keyword !== '') {
+                        $keywords = explode(' ', $keyword);
 
-            //             $query->where(function ($q) use ($keywords, $keyword) {
-            //                 foreach ($keywords as $word) {
-            //                     $q->orWhere(function ($subQuery) use ($word) {
-            //                         $subQuery->where('name', 'LIKE', "%{$word}%");
-            //                         // ->orWhere('max_amount', 'LIKE', "%{$word}%");
-            //                     });
-            //                 }
-            //             });
-            //         }
-            //     }
-            // })
+                        $query->where(function ($q) use ($keywords, $keyword) {
+                            // foreach ($keywords as $word) {
+                            //     $q->orWhere(function ($subQuery) use ($word) {
+                            //         $subQuery->where('name', 'LIKE', "%{$word}%");
+                            //         // ->orWhere('max_amount', 'LIKE', "%{$word}%");
+                            //     });
+                            // }
+                            $q->whereHas('user', function ($q) use ($keyword) {
+                                $q->where('email', 'LIKE', "%{$keyword}%");
+                            });
+                            $q->orWhere('Amount', 'LIKE', "%{$keyword}%");
+                            $q->orWhere('balance_after', 'LIKE', "%{$keyword}%");
+                            $q->orWhere('transaction_reference', 'LIKE', "%{$keyword}%");
+                            $q->orWhere('created_at', 'LIKE', "%{$keyword}%");
+                        });
+                    }
+                }
+            })
             ->addColumn('checkbox', function ($row) {
                 return '<input type="checkbox" class="row-checkbox" value="' . $row->id . '">';
             })
@@ -123,7 +130,7 @@ class TransactionsDataTable extends DataTable
             ->setTableId('transactions-table')
             ->columns($this->getColumns())
             ->minifiedAjax()
-            ->orderBy(1)
+            ->orderBy(0)
             ->selectStyleSingle()
             ->buttons([
                 Button::make('excel'),
@@ -153,7 +160,7 @@ class TransactionsDataTable extends DataTable
             Column::make('balance_after')->title('Balance After')->orderable(false),
             Column::make('transaction_reference')->title('Transaction Reference')->orderable(false),
             Column::make('transaction_date')->title('Transaction Date')->orderable(false),
-            Column::make('actions')->title('Actions')->orderable(false)
+            // Column::make('actions')->title('Actions')->orderable(false)
         ];
     }
 

@@ -36,16 +36,18 @@ class PlanDataTable extends DataTable
                         $keywords = explode(' ', $keyword);
 
                         $query->where(function ($q) use ($keywords, $keyword) {
-                            foreach ($keywords as $word) {
-                                $q->orWhere(function ($subQuery) use ($word) {
-                                    $subQuery->where('name', 'LIKE', "%{$word}%");
-                                        // ->orWhere('max_amount', 'LIKE', "%{$word}%");
-                                });
-                            }
+                            // foreach ($keywords as $word) {
+                            //     $q->orWhere(function ($subQuery) use ($word) {
+                            //         $subQuery->where('name', 'LIKE', "%{$word}%");
+                            //         // ->orWhere('max_amount', 'LIKE', "%{$word}%");
+                            //     });
+                            // }
+                            $q->where('name', 'LIKE', "%{$keyword}%");
                             $q->orWhere('min_amount', 'LIKE', "%{$keyword}%");
                             $q->orWhere('max_amount', 'LIKE', "%{$keyword}%");
                             $q->orWhere('daily_roi', 'LIKE', "%{$keyword}%");
-                            $q->orWhere('days', 'LIKE', "%{$keyword}%");
+                            $q->orWhere('duration_days', 'LIKE', "%{$keyword}%");
+                            $q->orWhere('type', 'LIKE', "%{$keyword}%");
                         });
                     }
                 }
@@ -82,9 +84,9 @@ class PlanDataTable extends DataTable
             })
 
             ->addColumn('status', function ($row) {
-    $checked = $row->status == 1 ? 'checked' : '';
-    return '  <div class="form-check form-switch">
-        <input class="form-check-input status-toggle" type="checkbox" id="color-primary" data-id="'.$row->id.'"  '.$checked.'>
+                $checked = $row->status == 1 ? 'checked' : '';
+                return '  <div class="form-check form-switch">
+        <input class="form-check-input status-toggle" type="checkbox" id="color-primary" data-id="' . $row->id . '"  ' . $checked . '>
     </div>';
             })
             ->addColumn('actions', function ($row) {
@@ -141,7 +143,7 @@ class PlanDataTable extends DataTable
             ->setTableId('plan-table')
             ->columns($this->getColumns())
             ->minifiedAjax()
-            ->orderBy(1)
+            ->orderBy(0)
             ->selectStyleSingle()
             ->buttons([
                 Button::make('excel'),

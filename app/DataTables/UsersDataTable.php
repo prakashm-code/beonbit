@@ -58,10 +58,10 @@ class UsersDataTable extends DataTable
             ->addColumn('email', function ($row) {
                 return $row->email;
             })
-             ->addColumn('phone', function ($row) {
+            ->addColumn('phone', function ($row) {
                 return $row->phone;
             })
-             ->addColumn('country', function ($row) {
+            ->addColumn('country', function ($row) {
                 return $row->country;
             })
             ->addColumn('actions', function ($row) {
@@ -85,7 +85,7 @@ class UsersDataTable extends DataTable
                             </div>';
             })
 
-            ->rawColumns(['checkbox', 'name','email', 'phone','country', 'actions']);
+            ->rawColumns(['checkbox', 'name', 'email', 'phone', 'country', 'actions']);
     }
 
     /**

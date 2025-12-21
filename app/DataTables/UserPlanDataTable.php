@@ -29,23 +29,34 @@ class UserPlanDataTable extends DataTable
             ->addColumn('no', function () use (&$counter) {
                 return $counter++;
             })
-            // ->filter(function ($query) {
-            //     if ($this->request->has('search')) {
-            //         $keyword = trim($this->request->get('search')['value']);
-            //         if ($keyword !== '') {
-            //             $keywords = explode(' ', $keyword);
+            ->filter(function ($query) {
+                if ($this->request->has('search')) {
+                    $keyword = trim($this->request->get('search')['value']);
+                    if ($keyword !== '') {
+                        $keywords = explode(' ', $keyword);
 
-            //             $query->where(function ($q) use ($keywords, $keyword) {
-            //                 foreach ($keywords as $word) {
-            //                     $q->orWhere(function ($subQuery) use ($word) {
-            //                         $subQuery->where('name', 'LIKE', "%{$word}%");
-            //                         // ->orWhere('max_amount', 'LIKE', "%{$word}%");
-            //                     });
-            //                 }
-            //             });
-            //         }
-            //     }
-            // })
+                        $query->where(function ($q) use ($keywords, $keyword) {
+                            //     foreach ($keywords as $word) {
+                            //         $q->orWhere(function ($subQuery) use ($word) {
+                            //             $subQuery->where('name', 'LIKE', "%{$word}%");
+                            //             // ->orWhere('max_amount', 'LIKE', "%{$word}%");
+                            //         });
+                            //     }
+                            $q->whereHas('user', function ($q) use ($keyword) {
+                                $q->where('email', 'LIKE', "%{$keyword}%");
+                            });
+                            $q->orWhereHas('plan', function ($q) use ($keyword) {
+                                $q->where('name', 'LIKE', "%{$keyword}%");
+                            });
+                            $q->orWhere('start_date', 'LIKE', "%{$keyword}%");
+                            $q->orWhere('end_date', 'LIKE', "%{$keyword}%");
+                            $q->orWhere('amount', 'LIKE', "%{$keyword}%");
+                            $q->orWhere('daily_return_percent', 'LIKE', "%{$keyword}%");
+                            $q->orWhere('status', 'LIKE', "%{$keyword}%");
+                        });
+                    }
+                }
+            })
             ->addColumn('checkbox', function ($row) {
                 return '<input type="checkbox" class="row-checkbox" value="' . $row->id . '">';
             })
@@ -81,7 +92,7 @@ class UserPlanDataTable extends DataTable
                 $cryptId = encrypt($row->id);
                 $template_delete = decrypt($cryptId);
                 // $delete_url = route('admin.plan_destroy', $cryptId);
-                $delete_url ="";
+                $delete_url = "";
 
                 return '<div class="action-icon" style="gap: 20px;display: flex">
                             <form id="delete_plan_form' . $template_delete . '" action="' . $delete_url . '" method="POST">' .
@@ -120,7 +131,7 @@ class UserPlanDataTable extends DataTable
             $direction = 'asc';
         }
 
-        return UserPlan::query()->with('user','plan')->orderBy($column, $direction);
+        return UserPlan::query()->with('user', 'plan')->orderBy($column, $direction);
     }
 
     /**

@@ -36,11 +36,12 @@ class ReferralSettingDataTable extends DataTable
                         $keywords = explode(' ', $keyword);
 
                         $query->where(function ($q) use ($keywords, $keyword) {
-                            foreach ($keywords as $word) {
-                                $q->orWhere(function ($subQuery) use ($word) {
-                                    $subQuery->where('level', 'LIKE', "%{$word}%");
-                                });
-                            }
+                            // foreach ($keywords as $word) {
+                            //     $q->orWhere(function ($subQuery) use ($word) {
+                            //         $subQuery->where('level', 'LIKE', "%{$word}%");
+                            //     });
+                            // }
+                            $q->where('level', 'LIKE', "%{$keyword}%");
                             $q->orWhere('percentage', 'LIKE', "%{$keyword}%");
                         });
                     }
