@@ -12,11 +12,15 @@ use App\Http\Controllers\API\WithdrawalController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
-Route::post('/user_profile', [AuthController::class, 'profile']);
+Route::post('/forget_password', [AuthController::class, 'forgotPassword']);
+Route::post('/reset_password', [AuthController::class, 'resetPassword']);
+Route::get('/user_profile', [AuthController::class, 'profile']);
 Route::post('/CompressVideo', [ApiController::class, 'CompressVideo']);
 Route::post('/CompressImage', [ApiController::class, 'CompressImage']);
 
 Route::group(['middleware' => checkUser::class], function () {
+    Route::post('/update_profile', [AuthController::class, 'updateProfile']);
+
     Route::post('/user_dashboard', [AuthController::class, 'dashboard']);
     Route::get('/get_plans', [PlanController::class, 'index']);
     Route::get('plans/{id}', [PlanController::class, 'show']);

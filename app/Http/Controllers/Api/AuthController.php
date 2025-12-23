@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
@@ -147,7 +150,7 @@ class AuthController extends Controller
                     'name'             => $user->name,
                     'email'            => $user->email,
                     'phone'            => $user->phone,
-
+                    'profile' => asset('asstes/front/img/profile/' . $user->profile),
                     'country'          => $user->country,
                     'address'          => $user->address,
                     'id_proof'         => $user->id_proof,
@@ -173,7 +176,66 @@ class AuthController extends Controller
             ], 500);
         }
     }
+    public function updateProfile(Request $request)
+    {
+        try {
+            DB::beginTransaction();
 
+            $user = Auth::guard('api')->user();
+
+            $validator = Validator::make($request->all(), [
+                'first_name' => 'nullable|string|max:100',
+                'last_name'  => 'nullable|string|max:100',
+                'email'     => 'nullable|email|unique:users,email,' . $user->id,
+                // 'mobile'    => 'nullable|string|max:15',
+                // 'gender'    => 'nullable|in:male,female,other',
+                // 'image'     => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 1,
+                    'message' => $validator->errors()->first()
+                ], 200);
+            }
+            if ($request->hasFile('profile') && $request->file('profile')->isValid()) {
+                $destinationPath = public_path('assets/front/img/profile');
+                if (!file_exists($destinationPath)) {
+                    mkdir($destinationPath, 0775, true);
+                }
+                if (!empty($user->profile)) {
+                    $oldImagePath = $destinationPath . '/' . $user->image;
+                    if (file_exists($oldImagePath)) {
+                        unlink($oldImagePath);
+                    }
+                }
+
+                $image = $request->file('profile');
+                $imageName = 'user_' . $user->id . '_' . time() . '.' . $image->extension();
+                $image->move($destinationPath, $imageName);
+                $user->profile = $imageName;
+            }
+            $user->first_name = $request->first_name ?? $user->first_name;
+            $user->last_name  = $request->last_name ?? $user->last_name;
+            $user->email     = $request->email ?? $user->email;
+            $user->phone    = $request->phone ?? $user->phone;
+            $user->save();
+            DB::commit();
+
+            return response()->json([
+                'status' => 0,
+                'message' => 'Profile updated successfully',
+                'data' => $user
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'Database error'
+            ], 500);
+        }
+    }
 
     public function dashboard()
     {
@@ -186,5 +248,83 @@ class AuthController extends Controller
             'total_deposits'     => $u->transactions()->count(),
             'total_withdrawals'  => $u->withdrawals()->where('status', 'approved')->sum('amount'),
         ]);
+    }
+
+    public function forgotPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:users,email'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 1,
+                'message' => $validator->errors()->first()
+            ], 200);
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        // generate token
+        $token = Str::random(60);
+
+        $user->reset_token = $token;
+        $user->reset_token_expiry = Carbon::now()->addMinutes(2);
+        $user->save();
+
+        $resetLink = url('/reset-password?token=' . $token . '&email=' . $user->email);
+
+        Mail::raw(
+            "Click to reset your password:\n\n$resetLink\n\nThis link expires in 30 minutes.",
+            function ($message) use ($user) {
+                $message->to($user->email)
+                    ->subject('Reset Your Password');
+            }
+        );
+
+        return response()->json([
+            'status'  => 0,
+            'message' => 'Password reset link sent to your email'
+        ], 200);
+    }
+
+    public function resetPassword(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'email'    => 'required|email|exists:users,email',
+            'token'    => 'required',
+            'password' => 'required|min:6',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 1,
+                'message' => $validator->errors()->first()
+            ], 200);
+        }
+
+        $user = User::where('email', $request->email)
+            ->where('reset_token', $request->token)
+            ->where('reset_token_expiry', '>=', now())
+            ->first();
+
+        if (!$user) {
+            return response()->json([
+                'status'  => 1,
+                'message' => 'Invalid or expired token'
+            ], 200);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->password),
+            'reset_token' => null,
+            'reset_token_expiry' => null,
+        ]);
+
+        return response()->json([
+            'status'  => 0,
+            'message' => 'Password reset successfully'
+        ], 200);
     }
 }
