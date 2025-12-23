@@ -72,7 +72,7 @@ class AuthController extends Controller
             DB::rollBack();
             return response()->json([
                 'status'  => 1,
-                'message' => 'Withdrawal request failed',
+                'message' => 'Registration unsuccessful',
                 'error'   => $e->getMessage()
             ], 500);
         }
