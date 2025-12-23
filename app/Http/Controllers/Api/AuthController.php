@@ -277,15 +277,15 @@ class AuthController extends Controller
         $user->reset_token_expiry = Carbon::now()->addMinutes(2);
         $user->save();
 
-        $resetLink = url('/reset-password?token=' . $token . '&email=' . $user->email);
+        $resetLink = url('/reset-password?token=' . $token);
 
-        Mail::raw(
-            "Click to reset your password:\n\n$resetLink\n\nThis link expires in 30 minutes.",
-            function ($message) use ($user) {
-                $message->to($user->email)
-                    ->subject('Reset Your Password');
-            }
-        );
+        Mail::send('emails.forgot_password', [
+            'user' => $user,
+            'resetLink' => $resetLink,
+        ], function ($message) use ($user) {
+            $message->to($user->email)
+                ->subject('Reset Your Password');
+        });
 
         return response()->json([
             'status'  => 0,
@@ -295,10 +295,8 @@ class AuthController extends Controller
 
     public function resetPassword(Request $request)
     {
-
         $validator = Validator::make($request->all(), [
-            'email'    => 'required|email|exists:users,email',
-            'token'    => 'required',
+            'reset_token'    => 'required',
             'password' => 'required|min:6',
         ]);
 
@@ -309,8 +307,7 @@ class AuthController extends Controller
             ], 200);
         }
 
-        $user = User::where('email', $request->email)
-            ->where('reset_token', $request->token)
+        $user = User::where('reset_token', $request->reset_token)
             ->where('reset_token_expiry', '>=', now())
             ->first();
 
