@@ -244,9 +244,13 @@ class AuthController extends Controller
 
         return response()->json([
             'balance'            => $u->wallet->balance ?? 0,
-            'active_plans'       => $u->userPlans()->where('status', 'active')->count(),
-            'total_deposits'     => $u->transactions()->count(),
-            'total_withdrawals'  => $u->withdrawals()->where('status', 'approved')->sum('amount'),
+            'active_plans'       => 0,
+            // 'active_plans'       => $u->userPlans()->where('status', 'active')->count() ?? 0,
+            // 'total_deposits'     => $u->transactions()->count() ?? 0,
+            'total_deposits'     =>  0,
+            'total_withdrawals'     =>  0,
+
+            // 'total_withdrawals'  => $u->withdrawals()->where('status', 'approved')->sum('amount') ?? 0,
         ]);
     }
 
