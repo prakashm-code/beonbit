@@ -250,6 +250,7 @@ class AuthController extends Controller
             'total_deposits'     =>  0,
             'total_withdrawals'     =>  0,
 
+
             // 'total_withdrawals'  => $u->withdrawals()->where('status', 'approved')->sum('amount') ?? 0,
         ]);
     }
