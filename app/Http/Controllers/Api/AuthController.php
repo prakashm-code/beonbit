@@ -61,7 +61,7 @@ class AuthController extends Controller
                     'user_id' => $user->id,
                     'referral_code' => $user->referral_code,
                     'referred_by' => $user->referred_by,
-                    'access_token' => $token,
+                    // 'access_token' => $token,
                 ]
             ], 200);
         } catch (\Exception $e) {
@@ -135,19 +135,49 @@ class AuthController extends Controller
     }
 
 
-    public function logout()
-    {
-        /** @var User $user */
-        $user = Auth::user();
+public function profile()
+{
+    try {
+        $user = Auth::guard('api')->user();
 
-        if ($user && $token = $user->currentAccessToken()) {
-            $user->tokens()->where('id', $token->id)->delete();
-        }
         return response()->json([
-            'status' => 0,
-            'message' => 'Logged out successfully'
-        ]);
+            'status'  => 1,
+            'message' => 'Profile fetched successfully',
+            'data'    => [
+                'id'               => $user->id,
+                'first_name'       => $user->first_name,
+                'last_name'        => $user->last_name,
+                'name'             => $user->name,
+                'email'            => $user->email,
+                'phone'            => $user->phone,
+
+                'country'          => $user->country,
+                'address'          => $user->address,
+                'id_proof'         => $user->id_proof,
+
+                'wallet_balance'   => (float) $user->wallet_balance,
+                'investment_amount'=> (float) $user->investment_amount,
+
+                'role'             => $user->role == '1' ? 'admin' : 'user',
+                'is_verified'      => $user->is_verified == '1',
+
+                'referral_code'    => $user->referral_code,
+                'referred_by'      => $user->referred_by,
+
+                'last_login'       => $user->last_login,
+                'created_at'       => $user->created_at,
+            ]
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status'  => 0,
+            'message' => 'Failed to fetch profile',
+            'error'   => $e->getMessage()
+        ], 500);
     }
+}
+
 
     public function dashboard()
     {

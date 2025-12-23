@@ -68,7 +68,7 @@ class WalletController extends Controller
                     ReferralEarning::create([
                         'referrer_id'      => $user->referred_by,
                         'referred_user_id' => $user->id,
-                        // 'user_plan_id'     => $userPlan->id,
+                        // 'user_plan_id'     => ,
                         'amount'           => $commission
                     ]);
                     Transaction::create([
@@ -95,31 +95,59 @@ class WalletController extends Controller
             DB::rollBack();
             return response()->json([
                 'status'  => 1,
-                'message' => 'Withdrawal request failed',
+                'message' => 'Money Not added successfully',
                 'error'   => $e->getMessage()
             ], 500);
         }
     }
 
-    public function transactions()
+    public function transactions(Request $request)
     {
-        $user = Auth::guard('api')->user();
+        // ✅ compulsory params validation
+        // $request->validate([
+        //     'limit'  => 'required|integer|min:1|max:100',
+        //     'page'   => 'required|integer|min:1',
+        //     'search' => 'required|string',
+        //     'sort'   => 'required|in:asc,desc',
+        // ]);
+
+        $user   = Auth::guard('api')->user();
+        $limit  = $request->limit??10;
+        $page   = $request->page??1;
+        $search = $request->search??"";
+        $sort   = $request->sort ?? 'desc';
 
         $transactions = $user->transactions()
-            ->orderBy('id', 'desc')
-            ->get([
+            ->when($search !== '', function ($q) use ($search) {
+                $q->where(function ($query) use ($search) {
+                    $query->where('type', 'LIKE', "%{$search}%")
+                        ->orWhere('amount', 'LIKE', "%{$search}%")
+                        ->orWhere('balance_after', 'LIKE', "%{$search}%")
+                        ->orWhere('transaction_reference', 'LIKE', "%{$search}%")
+                        ->orWhere('description', 'LIKE', "%{$search}%")
+                        ->orWhereDate('created_at', $search);
+                });
+            })
+            ->orderBy('id', $sort)
+            ->paginate($limit, [
                 'type',
                 'amount',
                 'balance_after',
                 'transaction_reference',
                 'description',
                 'created_at'
-            ]);
+            ], 'page', $page);
 
         return response()->json([
-            'status' => 0,
-            "message" => "All transaction",
-            'data' => $transactions
+            'status'  => 1,
+            'message' => 'All transactions',
+            'data'    => $transactions->items(),
+            'pagination' => [
+                'current_page' => $transactions->currentPage(),
+                'last_page'    => $transactions->lastPage(),
+                'per_page'     => $transactions->perPage(),
+                'total'        => $transactions->total(),
+            ]
         ], 200);
     }
 }

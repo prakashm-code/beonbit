@@ -153,17 +153,54 @@ class WithdrawalController extends Controller
     }
 
 
-    public function history()
+    public function history(Request $request)
     {
-        $user = Auth::guard('api')->user();
+        try {
 
-        $withdrawals = WithdrawRequest::where('user_id', $user->id)
-            ->latest()
-            ->paginate(20);
+            // ✅ compulsory params validation
+            // $request->validate([
+            //     'limit'  => 'required|integer|min:1|max:100',
+            //     'page'   => 'required|integer|min:1',
+            //     'search' => 'required|string',
+            //     'sort'   => 'required|in:asc,desc',
+            // ]);
 
-        return response()->json([
-            'status' => true,
-            'data'   => $withdrawals
-        ]);
+            $user   = Auth::guard('api')->user();
+            $limit  = $request->limit ?? 10;
+            $page   = $request->page ?? 1;
+            $search = $request->search ?? "";
+            $sort   = $request->sort ?? 'desc';
+
+            $withdrawals = WithdrawRequest::where('user_id', $user->id)
+                ->when($search !== '', function ($q) use ($search) {
+                    $q->where(function ($query) use ($search) {
+                        $query->where('amount', 'LIKE', "%{$search}%")
+                            ->orWhere('status', 'LIKE', "%{$search}%")
+                            ->orWhere('method', 'LIKE', "%{$search}%")
+                            ->orWhereDate('created_at', $search);
+                    });
+                })
+                ->orderBy('id', $sort)
+                ->paginate($limit, ['*'], 'page', $page);
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'Withdrawal history fetched successfully',
+                'data' => $withdrawals->items(),
+                'pagination' => [
+                    'current_page' => $withdrawals->currentPage(),
+                    'last_page'    => $withdrawals->lastPage(),
+                    'per_page'     => $withdrawals->perPage(),
+                    'total'        => $withdrawals->total(),
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Withdrawal failed',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
     }
 }
