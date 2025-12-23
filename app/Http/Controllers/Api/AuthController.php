@@ -19,7 +19,8 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name'          => 'required|string|max:255',
+            'first_name'          => 'required|string|max:255',
+            'last_name'          => 'required|string|max:255',
             'email'         => 'required|email|unique:users,email',
             // 'password'      => 'required|string|min:6|confirmed',
             'password'      => 'required|string|min:6',
@@ -39,8 +40,8 @@ class AuthController extends Controller
                 $referrer = User::where('referral_code', $request->referral_code)->first();
             }
             $user = User::create([
-                'name'     => $request->name,
                 'first_name'     => $request->first_name,
+                'last_name'     => $request->last_name,
                 'email'    => $request->email,
                 'password' => Hash::make($request->password),
                 'referral_code' => strtoupper(Str::random(8)),
@@ -135,48 +136,47 @@ class AuthController extends Controller
     }
 
 
-public function profile()
-{
-    try {
-        $user = Auth::guard('api')->user();
+    public function profile()
+    {
+        try {
+            $user = Auth::guard('api')->user();
 
-        return response()->json([
-            'status'  => 1,
-            'message' => 'Profile fetched successfully',
-            'data'    => [
-                'id'               => $user->id,
-                'first_name'       => $user->first_name,
-                'last_name'        => $user->last_name,
-                'name'             => $user->name,
-                'email'            => $user->email,
-                'phone'            => $user->phone,
+            return response()->json([
+                'status'  => 1,
+                'message' => 'Profile fetched successfully',
+                'data'    => [
+                    'id'               => $user->id,
+                    'first_name'       => $user->first_name,
+                    'last_name'        => $user->last_name,
+                    'name'             => $user->name,
+                    'email'            => $user->email,
+                    'phone'            => $user->phone,
 
-                'country'          => $user->country,
-                'address'          => $user->address,
-                'id_proof'         => $user->id_proof,
+                    'country'          => $user->country,
+                    'address'          => $user->address,
+                    'id_proof'         => $user->id_proof,
 
-                'wallet_balance'   => (float) $user->wallet_balance,
-                'investment_amount'=> (float) $user->investment_amount,
+                    'wallet_balance'   => (float) $user->wallet_balance,
+                    'investment_amount' => (float) $user->investment_amount,
 
-                'role'             => $user->role == '1' ? 'admin' : 'user',
-                'is_verified'      => $user->is_verified == '1',
+                    'role'             => $user->role == '1' ? 'admin' : 'user',
+                    'is_verified'      => $user->is_verified == '1',
 
-                'referral_code'    => $user->referral_code,
-                'referred_by'      => $user->referred_by,
+                    'referral_code'    => $user->referral_code,
+                    'referred_by'      => $user->referred_by,
 
-                'last_login'       => $user->last_login,
-                'created_at'       => $user->created_at,
-            ]
-        ], 200);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'status'  => 0,
-            'message' => 'Failed to fetch profile',
-            'error'   => $e->getMessage()
-        ], 500);
+                    'last_login'       => $user->last_login,
+                    'created_at'       => $user->created_at,
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Failed to fetch profile',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
     }
-}
 
 
     public function dashboard()
