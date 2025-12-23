@@ -29,7 +29,7 @@ class AuthController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'status' => 1,
-                'errors' => $validator->errors()
+                'message' => $validator->errors()->first()
             ], 200);
         }
         DB::beginTransaction();

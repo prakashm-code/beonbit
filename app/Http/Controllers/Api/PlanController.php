@@ -19,51 +19,30 @@ class PlanController extends Controller
     /**
      * List all active plans
      */
-    public function index(Request $request)
-    {
-        // $request->validate([
-        //     'limit'  => 'required|integer|min:1|max:100',
-        //     'page'   => 'required|integer|min:1',
-        //     'search' => 'required|string',
-        //     'sort'   => 'required|in:asc,desc',
-        // ]);
-        $limit  = $request->limit ?? 10;
-        $page   = $request->page ?? 1;
-        $search = $request->search ?? "";
-        $sort   = $request->sort ?? 'desc';
+public function index(Request $request)
+{
+    $plans = Plan::query()
+        ->select(
+            'id',
+            'name',
+            'description',
+            'min_amount',
+            'max_amount',
+            'daily_roi',
+            'duration_days',
+            'total_return',
+            'status',
+            'type'
+        )
+        ->where('status', '1')
+        ->orderBy('id', 'desc')
+        ->get()
+        ->map(function ($plan) {
 
-        $plans = Plan::query()
-            ->select(
-                'id',
-                'name',
-                'description',
-                'min_amount',
-                'max_amount',
-                'daily_roi',
-                'duration_days',
-                'total_return',
-                'status',
-                'type'
-            )
-            ->where('status', '1')
-            ->when($search !== '', function ($q) use ($search) {
-                $q->where(function ($query) use ($search) {
-                    $query->where('name', 'LIKE', "%{$search}%")
-                        ->orWhere('description', 'LIKE', "%{$search}%")
-                        ->orWhere('min_amount', 'LIKE', "%{$search}%")
-                        ->orWhere('max_amount', 'LIKE', "%{$search}%")
-                        ->orWhere('daily_roi', 'LIKE', "%{$search}%")
-                        ->orWhere('duration_days', 'LIKE', "%{$search}%")
-                        ->orWhere('total_return', 'LIKE', "%{$search}%");
-                });
-            })
-            ->orderBy('id', $sort)
-            ->paginate($limit, ['*'], 'page', $page);
-
-        $plans->getCollection()->transform(function ($plan) {
-
+            // status conversion
             $plan->status = $plan->status == '1' ? 'active' : 'inactive';
 
+            // type conversion
             $types = [
                 '1' => 'basic',
                 '2' => 'advanced',
@@ -78,18 +57,14 @@ class PlanController extends Controller
             return $plan;
         });
 
-        return response()->json([
-            'status' => 1,
-            'message' => 'Plans fetched successfully',
-            'data' => $plans->items(),
-            'pagination' => [
-                'current_page' => $plans->currentPage(),
-                'last_page'    => $plans->lastPage(),
-                'per_page'     => $plans->perPage(),
-                'total'        => $plans->total(),
-            ]
-        ], 200);
-    }
+    return response()->json([
+        'status'  => 1,
+        'message' => 'Plans fetched successfully',
+        'data'    => $plans
+    ], 200);
+}
+
+
 
 
 
