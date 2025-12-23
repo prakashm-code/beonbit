@@ -9,6 +9,8 @@ use App\Models\Wallet;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\UserResource;
+use App\Models\UserPlan;
+use App\Models\WithdrawRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
@@ -240,18 +242,13 @@ class AuthController extends Controller
     public function dashboard()
     {
         /** @var User $u */
-        $u = Auth::user();
+        $u = Auth::guard('api')->user();
 
         return response()->json([
             'balance'            => $u->wallet->balance ?? 0,
-            'active_plans'       => 0,
-            // 'active_plans'       => $u->userPlans()->where('status', 'active')->count() ?? 0,
-            // 'total_deposits'     => $u->transactions()->count() ?? 0,
-            'total_deposits'     =>  0,
-            'total_withdrawals'     =>  0,
-
-
-            // 'total_withdrawals'  => $u->withdrawals()->where('status', 'approved')->sum('amount') ?? 0,
+            'active_plans'       => UserPlan::where('status', 'active')->where('user_id', $u->id)->count(),
+            'total_withdrawals_approve'     =>  WithdrawRequest::where('user_id', $u->id)->where('status', 'complete')->count(),
+            'total_withdrawals'  => WithdrawRequest::where('user_id', $u->id)->where('status', 'complete')->sum('amount') ?? 0,
         ]);
     }
 

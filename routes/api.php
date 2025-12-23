@@ -25,7 +25,7 @@ Route::group(['middleware' => checkUser::class], function () {
     Route::get('/get_plans', [PlanController::class, 'index']);
     Route::get('plans/{id}', [PlanController::class, 'show']);
     Route::post('/plan_subscribe', [PlanController::class, 'subscribe']);
-    Route::get('/user_plans', [PlanController::class, 'myPlans']);
+    Route::post('/user_plans', [PlanController::class, 'myPlans']);
 
     Route::post('/deposite', [DepositController::class, 'request']);
 
