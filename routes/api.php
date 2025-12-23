@@ -17,7 +17,7 @@ Route::post('/CompressVideo', [ApiController::class, 'CompressVideo']);
 Route::post('/CompressImage', [ApiController::class, 'CompressImage']);
 
 Route::group(['middleware' => checkUser::class], function () {
-
+    Route::get('/user_dashboard', [AuthController::class, 'dashboard']);
     Route::post('/get_plan', [PlanController::class, 'index']);
     Route::get('plans/{id}', [PlanController::class, 'show']);
     Route::post('/plan_subscribe', [PlanController::class, 'subscribe']);
@@ -37,6 +37,4 @@ Route::group(['middleware' => checkUser::class], function () {
     Route::post('/withdraw', [WithdrawalController::class, 'withdraw']);
 
     Route::get('/logout', [AuthController::class, 'logout']);
-
-
 });

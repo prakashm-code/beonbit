@@ -90,10 +90,7 @@ class AuthController extends Controller
         }
 
         $user = Auth::user();
-        $walletbalance = $user->wallet()->firstOrCreate([
-            'balance' => 0,
-            'locked_balance' => 0
-        ]);
+
         DB::table('oauth_access_tokens')
             ->where('user_id', $user->id)
             ->update([
@@ -113,7 +110,6 @@ class AuthController extends Controller
                 'data' => [
                     'user_id' => $user->id,
                     'user' => $user,
-                    'wallet_balance' => $walletbalance->balance,
                     'active_plans' => $active_plans,
                     'total_transactions' => $total_transactions,
                     'total_withdrawals' => $total_withdrawals,
