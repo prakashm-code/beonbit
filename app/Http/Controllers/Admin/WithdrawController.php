@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
-
 use App\DataTables\WithdrawDataTable;
 use App\Http\Controllers\Controller;
 use App\Models\WithdrawRequest;
