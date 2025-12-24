@@ -1,4 +1,4 @@
-<link rel="shortcut icon" type="image/png" href="{{ asset('assets/admin/images/logos/favicon.png') }}">
+<link rel="shortcut icon" type="image/png" href="{{ asset('assets/admin/images/logos/logo_new.png') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-tagsinput/0.8.0/bootstrap-tagsinput.css">
 
 <link rel="stylesheet" href="{{ asset('assets/admin/css/styles.min.css') }}">
