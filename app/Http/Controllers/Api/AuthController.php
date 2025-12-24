@@ -23,7 +23,7 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        dd(1);
+        dd('hello');
 
         $validator = Validator::make($request->all(), [
             'first_name'          => 'required|string|max:255',
