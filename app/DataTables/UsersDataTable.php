@@ -97,7 +97,7 @@ class UsersDataTable extends DataTable
     {
         $columns = [
             0 => 'id',
-            1 => 'name',
+            1 => 'first_name',
             2 => 'email',
             3 => 'phone',
             4 => 'country',
