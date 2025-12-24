@@ -8,9 +8,9 @@
                     <div class="card mb-0">
                         <div class="card-body">
                             <a href="#" class="text-nowrap logo-img text-center d-block py-3 w-100">
-                                <img src="{{ asset('assets/admin/images/logos/logo.svg') }}" alt="">
+                                <img src="{{ asset('assets/admin/images/logos/logo_new.png') }}" alt="">
                             </a>
-                            <p class="text-center">Your Social Campaigns</p>
+                            <p class="text-center">Infinite Wealth</p>
                             <form action="{{ route('admin.checkLogin') }}" method="POST" id="admin_login_form">
                                 @csrf
                                 <div class="mb-3">
