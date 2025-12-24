@@ -15,7 +15,7 @@ class AdminUserSeeder extends Seeder
     public function run(): void
     {
         $newUser=new User();
-        $newUser->name="admin";
+        $newUser->first_name="admin";
         $newUser->email="admin@yopmail.com";
         $newUser->password=Hash::make('123456');
         $newUser->role="1";
