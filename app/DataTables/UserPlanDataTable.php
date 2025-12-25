@@ -76,17 +76,9 @@ class UserPlanDataTable extends DataTable
                 return $row->amount;
             })
             ->addColumn('status', function ($row) {
-                // $types = [
-                //     1 => 'Basic',
-                //     2 => 'Advanced',
-                //     3 => 'Premium',
-                //     4 => 'Expert',
-                //     5 => 'Master',
-                //     6 => 'Professional'
-                // ];
-
-                return 'Active';
+                return $row->status;
             })
+
 
             ->addColumn('actions', function ($row) {
                 $cryptId = encrypt($row->id);
