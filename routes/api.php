@@ -2,9 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\CheckUser;
-use App\Http\Controllers\Api\ApiController;
-use App\Http\Controllers\Api\PlanController;
-use App\Http\Controllers\Api\DepositController;
+use App\Http\Controllers\API\ApiController;
+use App\Http\Controllers\API\PlanController;
+use App\Http\Controllers\API\DepositController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\ReferralController;
 use App\Http\Controllers\API\WalletController;
