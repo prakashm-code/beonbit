@@ -151,8 +151,6 @@ class WithdrawalController extends Controller
             ], 500);
         }
     }
-
-
     public function history(Request $request)
     {
         try {
