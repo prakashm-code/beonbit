@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Middleware\checkUser;
+use App\Http\Middleware\CheckUser;
 use App\Http\Controllers\Api\ApiController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\DepositController;
@@ -18,7 +18,7 @@ Route::get('/user_profile', [AuthController::class, 'profile']);
 Route::post('/CompressVideo', [ApiController::class, 'CompressVideo']);
 Route::post('/CompressImage', [ApiController::class, 'CompressImage']);
 
-Route::group(['middleware' => checkUser::class], function () {
+Route::group(['middleware' => CheckUser::class], function () {
     Route::post('/update_profile', [AuthController::class, 'updateProfile']);
 
     Route::post('/user_dashboard', [AuthController::class, 'dashboard']);
