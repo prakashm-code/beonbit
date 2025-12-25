@@ -19,50 +19,50 @@ class PlanController extends Controller
     /**
      * List all active plans
      */
-public function index(Request $request)
-{
-    $plans = Plan::query()
-        ->select(
-            'id',
-            'name',
-            'description',
-            'min_amount',
-            'max_amount',
-            'daily_roi',
-            'duration_days',
-            'total_return',
-            'status',
-            'type'
-        )
-        ->where('status', '1')
-        ->orderBy('id', 'desc')
-        ->get()
-        ->map(function ($plan) {
+    public function index(Request $request)
+    {
+        $plans = Plan::query()
+            ->select(
+                'id',
+                'name',
+                'description',
+                'min_amount',
+                'max_amount',
+                'daily_roi',
+                'duration_days',
+                'total_return',
+                'status',
+                'type'
+            )
+            ->where('status', '1')
+            ->orderBy('id', 'desc')
+            ->get()
+            ->map(function ($plan) {
 
-            // status conversion
-            $plan->status = $plan->status == '1' ? 'active' : 'inactive';
+                // status conversion
+                $plan->status = $plan->status == '1' ? 'active' : 'inactive';
 
-            // type conversion
-            $types = [
-                '1' => 'basic',
-                '2' => 'advanced',
-                '3' => 'premium',
-                '4' => 'expert',
-                '5' => 'master',
-                '6' => 'professional',
-            ];
+                // type conversion
+                $types = [
+                    '1' => 'basic',
+                    '2' => 'advanced',
+                    '3' => 'premium',
+                    '4' => 'expert',
+                    '5' => 'master',
+                    '6' => 'professional',
+                ];
 
-            $plan->type = $types[$plan->type] ?? 'unknown';
+                $plan->type = $types[$plan->type] ?? 'unknown';
 
-            return $plan;
-        });
+                return $plan;
+            });
 
-    return response()->json([
-        'status'  => 1,
-        'message' => 'Plans fetched successfully',
-        'data'    => $plans
-    ], 200);
-}
+        return response()->json([
+            'status'  => 1,
+            'message' => 'Plans fetched successfully',
+            'data'    => $plans
+        ], 200);
+    }
 
 
 
@@ -83,7 +83,8 @@ public function index(Request $request)
 
             return response()->json([
                 'status' => 0,
-                'plan'   => new PlanResource($plan),
+                'message' => 'Plan Data',
+                'data'   => new PlanResource($plan),
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -171,86 +172,84 @@ public function index(Request $request)
         }
     }
 
-   public function myPlans(Request $request)
-{
-    try {
+    public function myPlans(Request $request)
+    {
+        try {
 
-        $user   = Auth::guard('api')->user();
-        $limit  = $request->limit??10;
-        $page   = $request->page??1;
-        $search = $request->search??"";
-        $sort   = $request->sort ?? 'desc';
+            $user   = Auth::guard('api')->user();
+            $limit  = $request->limit ?? 10;
+            $page   = $request->page ?? 1;
+            $search = $request->search ?? "";
+            $sort   = $request->sort ?? 'desc';
 
-        $plans = UserPlan::where('user_id', $user->id)
-            ->with('plan')
-            ->when($search !== '', function ($q) use ($search) {
-                $q->where(function ($query) use ($search) {
+            $plans = UserPlan::where('user_id', $user->id)
+                ->with('plan')
+                ->when($search !== '', function ($q) use ($search) {
+                    $q->where(function ($query) use ($search) {
 
-                    // search in related plan
-                    $query->orWhereHas('plan', function ($p) use ($search) {
-                        $p->where('name', 'LIKE', "%{$search}%");
+                        // search in related plan
+                        $query->orWhereHas('plan', function ($p) use ($search) {
+                            $p->where('name', 'LIKE', "%{$search}%");
+                        });
+
+                        // search in user_plans fields
+                        $query->orWhere('amount', 'LIKE', "%{$search}%")
+                            ->orWhere('status', 'LIKE', "%{$search}%")
+                            ->orWhereDate('start_date', $search)
+                            ->orWhereDate('end_date', $search);
                     });
+                })
+                ->orderBy('id', $sort)
+                ->paginate($limit, ['*'], 'page', $page);
 
-                    // search in user_plans fields
-                    $query->orWhere('amount', 'LIKE', "%{$search}%")
-                          ->orWhere('status', 'LIKE', "%{$search}%")
-                          ->orWhereDate('start_date', $search)
-                          ->orWhereDate('end_date', $search);
-                });
-            })
-            ->orderBy('id', $sort)
-            ->paginate($limit, ['*'], 'page', $page);
+            // ✅ transform paginated data
+            $plans->getCollection()->transform(function ($userPlan) {
 
-        // ✅ transform paginated data
-        $plans->getCollection()->transform(function ($userPlan) {
+                $today = Carbon::today();
+                $start = Carbon::parse($userPlan->start_date);
+                $end   = Carbon::parse($userPlan->end_date);
 
-            $today = Carbon::today();
-            $start = Carbon::parse($userPlan->start_date);
-            $end   = Carbon::parse($userPlan->end_date);
+                if ($today->gt($end)) {
+                    $daysCompleted = $end->diffInDays($start);
+                } else {
+                    $daysCompleted = max(0, $today->diffInDays($start));
+                }
 
-            if ($today->gt($end)) {
-                $daysCompleted = $end->diffInDays($start);
-            } else {
-                $daysCompleted = max(0, $today->diffInDays($start));
-            }
+                if ($userPlan->status === 'active') {
+                    $currentInterest = $daysCompleted * $userPlan->daily_interest_amount;
+                } else {
+                    $currentInterest = $userPlan->total_interest;
+                }
 
-            if ($userPlan->status === 'active') {
-                $currentInterest = $daysCompleted * $userPlan->daily_interest_amount;
-            } else {
-                $currentInterest = $userPlan->total_interest;
-            }
+                return [
+                    'user_plan_id'   => $userPlan->id,
+                    'plan_name'      => $userPlan->plan->name,
+                    'plan_id'      => $userPlan->plan_id,
+                    'amount'         => (float) $userPlan->amount,
+                    'daily_interest' => (float) $userPlan->daily_interest_amount,
+                    'total_interest' => (float) $currentInterest,
+                    'start_date'     => $userPlan->start_date,
+                    'end_date'       => $userPlan->end_date,
+                    'status'         => $userPlan->status,
+                ];
+            });
 
-            return [
-                'user_plan_id'   => $userPlan->id,
-                'plan_name'      => $userPlan->plan->name,
-                'plan_id'      => $userPlan->plan_id,
-                'amount'         => (float) $userPlan->amount,
-                'daily_interest' => (float) $userPlan->daily_interest_amount,
-                'total_interest' => (float) $currentInterest,
-                'start_date'     => $userPlan->start_date,
-                'end_date'       => $userPlan->end_date,
-                'status'         => $userPlan->status,
-            ];
-        });
-
-        return response()->json([
-            'status' => 0,
-            'data'   => $plans->items(),
-            'pagination' => [
-                'current_page' => $plans->currentPage(),
-                'last_page'    => $plans->lastPage(),
-                'per_page'     => $plans->perPage(),
-                'total'        => $plans->total(),
-            ]
-        ], 200);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'status'  => 1,
-            'message' => 'Failed to fetch plans',
-            'error'   => $e->getMessage()
-        ], 500);
+            return response()->json([
+                'status' => 0,
+                'data'   => $plans->items(),
+                'pagination' => [
+                    'current_page' => $plans->currentPage(),
+                    'last_page'    => $plans->lastPage(),
+                    'per_page'     => $plans->perPage(),
+                    'total'        => $plans->total(),
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 1,
+                'message' => 'Failed to fetch plans',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
     }
-}
-
 }

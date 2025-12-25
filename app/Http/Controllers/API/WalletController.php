@@ -84,7 +84,7 @@ class WalletController extends Controller
             DB::commit();
 
             return response()->json([
-                'status'  => true,
+                'status'  => 0,
                 'message' => 'Money added successfully',
                 'data'    => [
                     'user_id' => $user->id,

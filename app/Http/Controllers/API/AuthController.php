@@ -144,7 +144,7 @@ class AuthController extends Controller
             $user = Auth::guard('api')->user();
 
             return response()->json([
-                'status'  => 1,
+                'status'  => 0,
                 'message' => 'Profile fetched successfully',
                 'data'    => [
                     'id'               => $user->id,
@@ -173,7 +173,7 @@ class AuthController extends Controller
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
-                'status'  => 0,
+                'status'  => 1,
                 'message' => 'Failed to fetch profile',
                 'error'   => $e->getMessage()
             ], 500);
