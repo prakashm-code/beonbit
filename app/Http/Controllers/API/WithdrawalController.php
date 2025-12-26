@@ -102,6 +102,7 @@ class WithdrawalController extends Controller
             Transaction::create([
                 'user_id' => $user->id,
                 'type' => 'debit',
+                'category' => 'withdrawal',
                 'amount' => $request->amount,
                 'balance_after' => $wallet->balance,
                 'transaction_reference' => 'WD-' . uniqid(),

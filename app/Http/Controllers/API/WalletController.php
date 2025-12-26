@@ -51,6 +51,7 @@ class WalletController extends Controller
             Transaction::create([
                 'user_id' => $user->id,
                 'type' => 'credit',
+                'category' => 'topup',
                 'amount' => $request->amount,
                 'balance_after' => $userWallet->balance,
                 'transaction_reference' => 'TOPUP',
@@ -110,6 +111,7 @@ class WalletController extends Controller
             ->when($search !== '', function ($q) use ($search) {
                 $q->where(function ($query) use ($search) {
                     $query->where('type', 'LIKE', "%{$search}%")
+                        ->orWhere('category', 'LIKE', "%{$search}%")
                         ->orWhere('amount', 'LIKE', "%{$search}%")
                         ->orWhere('balance_after', 'LIKE', "%{$search}%")
                         ->orWhere('transaction_reference', 'LIKE', "%{$search}%")
@@ -120,6 +122,7 @@ class WalletController extends Controller
             ->orderBy('id', $sort)
             ->paginate($limit, [
                 'type',
+                'category',
                 'amount',
                 'balance_after',
                 'transaction_reference',

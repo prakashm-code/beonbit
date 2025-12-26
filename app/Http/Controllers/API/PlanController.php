@@ -136,9 +136,10 @@ class PlanController extends Controller
             Transaction::create([
                 'user_id' => $user->id,
                 'type' => 'debit',
+                'category'=>'plan_purchase',
                 'amount' => $request->amount,
                 'balance_after' => $wallet->balance,
-                'transaction_reference' => 'PLAN-' . $userPlan->id,
+                'transaction_reference' => 'plan_purchase',
                 'description' => 'Plan purchase'
             ]);
 
