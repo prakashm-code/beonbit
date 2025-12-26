@@ -162,10 +162,10 @@ class PlanDataTable extends DataTable
     {
         return [
 
-            Column::make('checkbox')
-                ->title('<input type="checkbox" id="select-all">')
-                ->orderable(false)
-                ->searchable(false),
+            // Column::make('checkbox')
+            //     ->title('<input type="checkbox" id="select-all">')
+            //     ->orderable(false)
+            //     ->searchable(false),
             Column::make('no')->title('No')->orderable(false),
             Column::make('name')->orderable(true),
             Column::make('min_amount')->title('Min Amount')->orderable(true),

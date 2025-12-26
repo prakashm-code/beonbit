@@ -149,10 +149,10 @@ class TransactionsDataTable extends DataTable
     {
         return [
 
-            Column::make('checkbox')
-                ->title('<input type="checkbox" id="select-all">')
-                ->orderable(false)
-                ->searchable(false),
+            // Column::make('checkbox')
+            //     ->title('<input type="checkbox" id="select-all">')
+            //     ->orderable(false)
+            //     ->searchable(false),
             Column::make('no')->title('No')->orderable(false),
             Column::make('email')->title('Email')->orderable(true),
             Column::make('type')->title('Plan')->orderable(true),

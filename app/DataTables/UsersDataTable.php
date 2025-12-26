@@ -143,10 +143,10 @@ class UsersDataTable extends DataTable
     public function getColumns(): array
     {
         return [
-            Column::make('checkbox')
-                ->title('<input type="checkbox" id="select-all">')
-                ->orderable(false)
-                ->searchable(false),
+            // Column::make('checkbox')
+            //     ->title('<input type="checkbox" id="select-all">')
+            //     ->orderable(false)
+            //     ->searchable(false),
             Column::make('no')->title('No')->orderable(false),
             Column::make('name')->title('Name')->orderable(true),
             Column::make('email')->title('Email')->orderable(true),

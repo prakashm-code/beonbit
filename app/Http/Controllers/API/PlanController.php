@@ -115,7 +115,7 @@ class PlanController extends Controller
                 return response()->json([
                     'status' => 1,
                     'message' => 'Invalid amount for this plan'
-                ], 500);
+                ], 200);
             }
 
             $wallet = Wallet::where('user_id', $user->id)->first();
@@ -124,7 +124,7 @@ class PlanController extends Controller
                 return response()->json([
                     'status' => 1,
                     'message' => 'Insufficient wallet balance'
-                ], 500);
+                ], 200);
             }
             $wallet->balance -= $request->amount;
             $wallet->locked_balance += $request->amount;

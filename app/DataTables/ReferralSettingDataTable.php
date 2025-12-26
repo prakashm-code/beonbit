@@ -133,10 +133,10 @@ class ReferralSettingDataTable extends DataTable
     public function getColumns(): array
     {
         return [
-            Column::make('checkbox')
-                ->title('<input type="checkbox" id="select-all">')
-                ->orderable(false)
-                ->searchable(false),
+            // Column::make('checkbox')
+            //     ->title('<input type="checkbox" id="select-all">')
+            //     ->orderable(false)
+            //     ->searchable(false),
             Column::make('no')->title('No')->orderable(false),
             Column::make('level')->title('Level')->orderable(true),
             Column::make('percentage')->title('Commission %')->orderable(true),
