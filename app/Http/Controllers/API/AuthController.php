@@ -158,8 +158,8 @@ class AuthController extends Controller
                     'address'          => $user->address,
                     'id_proof'         => $user->id_proof,
 
-                    'wallet_balance'   => (float) $user->wallet_balance,
-                    'investment_amount' => (float) $user->investment_amount,
+                    'wallet_balance'   => (float)  $user->wallet->balance ?? 0,
+                    // 'investment_amount' => (float) $user->investment_amount,
 
                     'role'             => $user->role == '1' ? 'admin' : 'user',
                     'is_verified'      => $user->is_verified == '1',
