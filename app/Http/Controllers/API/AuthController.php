@@ -23,7 +23,6 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
-
         $validator = Validator::make($request->all(), [
             'first_name'          => 'required|string|max:255',
             'last_name'          => 'required|string|max:255',
@@ -68,7 +67,6 @@ class AuthController extends Controller
                     'user_id' => $user->id,
                     'referral_code' => $user->referral_code,
                     'referred_by' => $user->referred_by,
-                    // 'access_token' => $token,
                 ]
             ], 200);
         } catch (\Exception $e) {
@@ -142,7 +140,6 @@ class AuthController extends Controller
     {
         try {
             $user = Auth::guard('api')->user();
-
             return response()->json([
                 'status'  => 0,
                 'message' => 'Profile fetched successfully',
@@ -157,16 +154,12 @@ class AuthController extends Controller
                     'country'          => $user->country,
                     'address'          => $user->address,
                     'id_proof'         => $user->id_proof,
-
                     'wallet_balance'   => (float)  $user->wallet->balance ?? 0,
                     // 'investment_amount' => (float) $user->investment_amount,
-
                     'role'             => $user->role == '1' ? 'admin' : 'user',
                     'is_verified'      => $user->is_verified == '1',
-
                     'referral_code'    => $user->referral_code,
                     'referred_by'      => $user->referred_by,
-
                     'last_login'       => $user->last_login,
                     'created_at'       => $user->created_at,
                 ]
@@ -183,9 +176,7 @@ class AuthController extends Controller
     {
         try {
             DB::beginTransaction();
-
             $user = Auth::guard('api')->user();
-
             $validator = Validator::make($request->all(), [
                 'first_name' => 'nullable|string|max:100',
                 'last_name'  => 'nullable|string|max:100',
@@ -212,7 +203,6 @@ class AuthController extends Controller
                         unlink($oldImagePath);
                     }
                 }
-
                 $image = $request->file('profile');
                 $imageName = 'user_' . $user->id . '_' . time() . '.' . $image->extension();
                 $image->move($destinationPath, $imageName);
@@ -232,7 +222,6 @@ class AuthController extends Controller
             ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-
             return response()->json([
                 'status' => 1,
                 'message' => 'Database error'
@@ -244,7 +233,6 @@ class AuthController extends Controller
     {
         /** @var User $u */
         $u = Auth::guard('api')->user();
-
         return response()->json([
             'balance'            => $u->wallet->balance ?? 0,
             'active_plans'       => UserPlan::where('status', 'active')->where('user_id', $u->id)->count(),
@@ -265,10 +253,7 @@ class AuthController extends Controller
                 'message' => $validator->errors()->first()
             ], 200);
         }
-
         $user = User::where('email', $request->email)->first();
-
-        // generate token
         $token = Str::random(60);
 
         $user->reset_token = $token;

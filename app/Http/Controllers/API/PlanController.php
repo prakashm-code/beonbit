@@ -38,11 +38,7 @@ class PlanController extends Controller
             ->orderBy('id', 'desc')
             ->get()
             ->map(function ($plan) {
-
-                // status conversion
                 $plan->status = $plan->status == '1' ? 'active' : 'inactive';
-
-                // type conversion
                 $types = [
                     '1' => 'basic',
                     '2' => 'advanced',
@@ -51,7 +47,6 @@ class PlanController extends Controller
                     '5' => 'master',
                     '6' => 'professional',
                 ];
-
                 $plan->type = $types[$plan->type] ?? 'unknown';
 
                 return $plan;
@@ -63,10 +58,6 @@ class PlanController extends Controller
             'data'    => $plans
         ], 200);
     }
-
-
-
-
 
     public function show($id)
     {
@@ -95,7 +86,6 @@ class PlanController extends Controller
             ], 500);
         }
     }
-
     public function subscribe(Request $request)
     {
         $request->validate([
@@ -105,7 +95,6 @@ class PlanController extends Controller
         DB::beginTransaction();
 
         try {
-
             $user = Auth::guard('api')->user();
             $plan = Plan::where('id', $request->plan_id)
                 ->where('status', 1)
@@ -130,11 +119,8 @@ class PlanController extends Controller
             $wallet->locked_balance += $request->amount;
             $wallet->save();
 
-
-
             $dailyReturnPercent = $plan->daily_roi;
             $dailyInterestAmount = ($request->amount * $dailyReturnPercent) / 100;
-
             $userPlan = UserPlan::create([
                 'user_id'        => $user->id,
                 'plan_id'        => $plan->id,
@@ -156,7 +142,6 @@ class PlanController extends Controller
                 'description' => 'Plan purchase'
             ]);
 
-
             DB::commit();
             return response()->json([
                 'status' => 0,
@@ -171,11 +156,9 @@ class PlanController extends Controller
             ], 500);
         }
     }
-
     public function myPlans(Request $request)
     {
         try {
-
             $user   = Auth::guard('api')->user();
             $limit  = $request->limit ?? 10;
             $page   = $request->page ?? 1;
@@ -186,13 +169,9 @@ class PlanController extends Controller
                 ->with('plan')
                 ->when($search !== '', function ($q) use ($search) {
                     $q->where(function ($query) use ($search) {
-
-                        // search in related plan
                         $query->orWhereHas('plan', function ($p) use ($search) {
                             $p->where('name', 'LIKE', "%{$search}%");
                         });
-
-                        // search in user_plans fields
                         $query->orWhere('amount', 'LIKE', "%{$search}%")
                             ->orWhere('status', 'LIKE', "%{$search}%")
                             ->orWhereDate('start_date', $search)
@@ -201,10 +180,7 @@ class PlanController extends Controller
                 })
                 ->orderBy('id', $sort)
                 ->paginate($limit, ['*'], 'page', $page);
-
-            // ✅ transform paginated data
             $plans->getCollection()->transform(function ($userPlan) {
-
                 $today = Carbon::today();
                 $start = Carbon::parse($userPlan->start_date);
                 $end   = Carbon::parse($userPlan->end_date);

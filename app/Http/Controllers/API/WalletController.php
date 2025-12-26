@@ -19,14 +19,12 @@ class WalletController extends Controller
     public function getWallet()
     {
         $user = Auth::guard('api')->user();
-
         if (!$user->wallet) {
             $user->wallet()->create([
                 'balance' => 0,
                 'locked_balance' => 0
             ]);
         }
-
         return response()->json([
             'status' => 0,
             'message' => "Wallet balance",
@@ -68,7 +66,6 @@ class WalletController extends Controller
                     ReferralEarning::create([
                         'referrer_id'      => $user->referred_by,
                         'referred_user_id' => $user->id,
-                        // 'user_plan_id'     => ,
                         'amount'           => $commission
                     ]);
                     Transaction::create([
@@ -103,18 +100,10 @@ class WalletController extends Controller
 
     public function transactions(Request $request)
     {
-        // ✅ compulsory params validation
-        // $request->validate([
-        //     'limit'  => 'required|integer|min:1|max:100',
-        //     'page'   => 'required|integer|min:1',
-        //     'search' => 'required|string',
-        //     'sort'   => 'required|in:asc,desc',
-        // ]);
-
         $user   = Auth::guard('api')->user();
-        $limit  = $request->limit??10;
-        $page   = $request->page??1;
-        $search = $request->search??"";
+        $limit  = $request->limit ?? 10;
+        $page   = $request->page ?? 1;
+        $search = $request->search ?? "";
         $sort   = $request->sort ?? 'desc';
 
         $transactions = $user->transactions()

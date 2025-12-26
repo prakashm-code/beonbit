@@ -72,76 +72,49 @@ class WithdrawalController extends Controller
     }
     public function withdraw(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'user_plan_id' => 'required|exists:user_plans,id'
+        $request->validate([
+            'amount' => 'required|numeric|min:1'
         ]);
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'errors' => $validator->errors()
-            ], 200);
-        }
+
         DB::beginTransaction();
 
         try {
-
             $user = Auth::guard('api')->user();
-            $userPlan = UserPlan::where('id', $request->user_plan_id)
-                ->where('user_id', $user->id)
-                ->firstOrFail();
+            $wallet = Wallet::where('user_id', $user->id)->lockForUpdate()->firstOrFail();
 
-            // if ($userPlan->status !== 'completed') {
-            //     DB::rollBack();
-            //     return response()->json([
-            //         'status' => 1,
-            //         'message' => 'Plan not completed yet'
-            //     ], 400);
-            // }
-
-            $wallet = Wallet::where('user_id', $user->id)->first();
-            if (!$wallet) {
-                DB::rollBack();
+            if ($wallet->balance < $request->amount) {
                 return response()->json([
                     'status' => 1,
-                    'message' => 'Wallet not found'
-                ], 400);
+                    'message' => 'Insufficient wallet balance'
+                ], 200);
             }
 
-            $withdrawAmount = $userPlan->amount + $userPlan->total_interest;
-            if ($wallet->locked_balance < $userPlan->amount) {
-                DB::rollBack();
-                return response()->json([
-                    'status' => 1,
-                    'message' => 'Invalid locked balance'
-                ], 400);
-            }
-
-            $wallet->locked_balance -= $userPlan->amount;
-            $wallet->balance += $withdrawAmount;
+            $wallet->balance -= $request->amount;
             $wallet->save();
 
-            $userPlan->status = 'withdrawn';
-            $userPlan->save();
+            // Create withdrawal request
+            // Withdrawal::create([
+            //     'user_id' => $user->id,
+            //     'amount' => $request->amount,
+            //     'status' => 'pending'
+            // ]);
 
             Transaction::create([
                 'user_id' => $user->id,
-                'type' => 'credit',
-                'amount' => $withdrawAmount,
+                'type' => 'debit',
+                'amount' => $request->amount,
                 'balance_after' => $wallet->balance,
-                'transaction_reference' => 'WITHDRAW-' . $userPlan->id,
-                'description' => 'Plan withdrawal'
+                'transaction_reference' => 'WD-' . uniqid(),
+                'description' => 'Wallet withdrawal request'
             ]);
 
             DB::commit();
 
             return response()->json([
                 'status' => 0,
-                'message' => 'Withdrawal successful',
-                'data' => [
-                    'withdraw_amount' => $withdrawAmount,
-                    'wallet_balance' => $wallet->balance
-                ]
-            ], 200);
+                'message' => 'Withdrawal request submitted',
+                'wallet_balance' => $wallet->balance
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -151,6 +124,7 @@ class WithdrawalController extends Controller
             ], 500);
         }
     }
+
     public function history(Request $request)
     {
         try {
