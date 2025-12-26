@@ -49,7 +49,6 @@ class UserController extends Controller
             DB::beginTransaction();
 
             $newUser = new User();
-            $newUser->name = $validated['first_name'];
             $newUser->first_name = $validated['first_name'];
             $newUser->last_name  = $validated['last_name'];
             $newUser->email      = $validated['email'];
