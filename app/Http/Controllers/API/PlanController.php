@@ -81,7 +81,7 @@ class PlanController extends Controller
             DB::rollBack();
             return response()->json([
                 'status'  => 1,
-                'message' => 'Withdrawal request failed',
+                'message' => 'Plan Data Not Fetched',
                 'error'   => $e->getMessage()
             ], 500);
         }
@@ -153,7 +153,7 @@ class PlanController extends Controller
             DB::rollBack();
             return response()->json([
                 'status'  => 1,
-                'message' => 'Withdrawal request failed',
+                'message' => 'Plan not purchased successfully',
                 'error'   => $e->getMessage()
             ], 500);
         }
