@@ -63,7 +63,7 @@ class AuthController extends Controller
             $verifyUrl = url('/verify-email/' . encrypt($user->id));
 
             Mail::send('emails.verify_email', [
-                'name' =>  $user->first_name.' '.$user->last_name,
+                'name' =>  $user->first_name . ' ' . $user->last_name,
                 'verifyUrl' => $verifyUrl
             ], function ($message) use ($user) {
                 $message->to($user->email)
@@ -328,19 +328,19 @@ class AuthController extends Controller
 
     public function verifyEmail(Request $request)
     {
-        $user = User::where('email',$request->email)->first();
+        $user = User::where('email', $request->email)->first();
 
         $verifyUrl = url('/verify-email/' . encrypt($user->id));
 
         Mail::send('emails.verify_email', [
-            'name' => $user->first_name.' '.$user->last_name,
+            'name' => $user->first_name . ' ' . $user->last_name,
             'verifyUrl' => $verifyUrl
         ], function ($message) use ($user) {
             $message->to($user->email)
                 ->subject('Verify Your Email');
         });
 
-         return response()->json([
+        return response()->json([
             'status'  => 0,
             'message' => 'Verification mail sent successfully'
         ], 200);
@@ -360,4 +360,18 @@ class AuthController extends Controller
 
         return view('verification_success');
     }
+
+   public function logout(Request $request)
+{
+    $user = Auth::guard('api')->user();
+
+    if ($user && $user->token()) {
+        $user->token()->revoke(); // revoke current token
+    }
+
+    return response()->json([
+        'status' => true,
+        'message' => 'Logged out successfully'
+    ]);
+}
 }
