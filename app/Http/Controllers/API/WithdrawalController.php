@@ -18,13 +18,15 @@ class WithdrawalController extends Controller
     {
         $request->validate([
             'amount' => 'required|numeric|min:1',
-            'transaction_method' => 'required|string'
+    'transaction_method' => 'required|min:1',
         ]);
 
         DB::beginTransaction();
 
         try {
+
             $user = Auth::guard('api')->user();
+
             $wallet = Wallet::firstOrCreate(
                 ['user_id' => $user->id],
                 ['balance' => 0, 'locked_balance' => 0]
@@ -46,14 +48,14 @@ class WithdrawalController extends Controller
                 'user_id' => $user->id,
                 'amount'  => $request->amount,
                 'method'  => $request->transaction_method,
-                'status'  => 'pending'
+                'status'  => 'completed'
             ]);
 
             DB::commit();
 
             return response()->json([
                 'status' => 0,
-                'message' => 'Withdrawal request sent to admin',
+                'message' => 'Withdrawal successful',
                 'data' => [
                     'withdrawal_id' => $withdrawal->id,
                     'amount' => $withdrawal->amount,

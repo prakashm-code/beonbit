@@ -36,7 +36,7 @@ Route::group(['middleware' => CheckUser::class], function () {
 
 
     Route::post('/withdraw_list', [WithdrawalController::class, 'history']);
-
+    Route::post('/withdraw_request', [WithdrawalController::class, 'request']);
     Route::post('/withdraw', [WithdrawalController::class, 'withdraw']);
 
     Route::get('/logout', [AuthController::class, 'logout']);
