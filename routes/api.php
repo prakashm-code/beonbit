@@ -15,8 +15,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/forget_password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset_password', [AuthController::class, 'resetPassword']);
 Route::get('/user_profile', [AuthController::class, 'profile']);
-Route::post('/CompressVideo', [ApiController::class, 'CompressVideo']);
-Route::post('/CompressImage', [ApiController::class, 'CompressImage']);
+Route::post('/send_verify_email', [AuthController::class, 'verifyEmail']);
 
 Route::group(['middleware' => CheckUser::class], function () {
     Route::post('/update_profile', [AuthController::class, 'updateProfile']);

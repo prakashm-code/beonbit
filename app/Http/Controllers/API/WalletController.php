@@ -37,6 +37,7 @@ class WalletController extends Controller
 
     public function addMoney(Request $request)
     {
+        // dd($getcommission);
         $request->validate([
             'amount'  => 'required|numeric|min:1'
         ]);
@@ -59,7 +60,8 @@ class WalletController extends Controller
             ]);
 
             if ($user->referred_by) {
-                $commission = ($request->amount * 5) / 100;
+                $getcommission = getCommission();
+                $commission = ($request->amount * $getcommission) / 100;
                 $referrerWallet = Wallet::where('user_id', $user->referred_by)->first();
                 if ($referrerWallet) {
                     $referrerWallet->balance += $commission;

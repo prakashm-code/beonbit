@@ -121,6 +121,7 @@ class PlanController extends Controller
 
             $dailyReturnPercent = $plan->daily_roi;
             $dailyInterestAmount = ($request->amount * $dailyReturnPercent) / 100;
+
             $userPlan = UserPlan::create([
                 'user_id'        => $user->id,
                 'plan_id'        => $plan->id,

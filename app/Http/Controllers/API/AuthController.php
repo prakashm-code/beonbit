@@ -59,7 +59,19 @@ class AuthController extends Controller
             ]);
             $token = $user->createToken('Personal Access Token')->accessToken;
 
+            // $hash = sha1($user->email);
+            $verifyUrl = url('/verify-email/' . encrypt($user->id));
+
+            Mail::send('emails.verify_email', [
+                'name' =>  $user->first_name.' '.$user->last_name,
+                'verifyUrl' => $verifyUrl
+            ], function ($message) use ($user) {
+                $message->to($user->email)
+                    ->subject('Verify Your Email');
+            });
             DB::commit();
+
+
             return response()->json([
                 'status' => 0,
                 'message' => 'Registration successful',
@@ -311,5 +323,41 @@ class AuthController extends Controller
             'status'  => 0,
             'message' => 'Password reset successfully'
         ], 200);
+    }
+
+
+    public function verifyEmail(Request $request)
+    {
+        $user = User::where('email',$request->email)->first();
+
+        $verifyUrl = url('/verify-email/' . encrypt($user->id));
+
+        Mail::send('emails.verify_email', [
+            'name' => $user->first_name.' '.$user->last_name,
+            'verifyUrl' => $verifyUrl
+        ], function ($message) use ($user) {
+            $message->to($user->email)
+                ->subject('Verify Your Email');
+        });
+
+         return response()->json([
+            'status'  => 0,
+            'message' => 'Verification mail sent successfully'
+        ], 200);
+    }
+    public function verify(Request $request, $id)
+    {
+        $id = decrypt($id);
+        $user = User::find($id);
+
+        if ($user->email_verified_at != "") {
+            return view('verification_success');
+        }
+
+        $user->update([
+            'email_verified_at' => now()
+        ]);
+
+        return view('verification_success');
     }
 }

@@ -16,6 +16,8 @@ class UserPlan extends Model
         'end_date',
         'amount',
         'daily_return_percent',
+        'daily_interest',
+        'total_interest',
         'status'
     ];
 
