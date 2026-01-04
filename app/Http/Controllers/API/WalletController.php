@@ -45,7 +45,10 @@ class WalletController extends Controller
         $user = Auth::guard('api')->user();
         DB::beginTransaction();
         try {
-            $userWallet = Wallet::where('user_id', $user->id)->first();
+            $userWallet = Wallet::firstOrCreate(
+                ['user_id' => $user->id],
+                ['balance' => 0]
+            );
             $userWallet->balance += $request->amount;
             $userWallet->save();
 
