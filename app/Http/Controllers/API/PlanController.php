@@ -107,7 +107,10 @@ class PlanController extends Controller
                 ], 200);
             }
 
-            $wallet = Wallet::where('user_id', $user->id)->first();
+            $wallet = Wallet::firstOrCreate(
+                ['user_id' => $user->id],
+                ['balance' => 0]
+            );
             // dd($wallet);
             if ($wallet->balance < $request->amount) {
                 return response()->json([
@@ -137,7 +140,7 @@ class PlanController extends Controller
             Transaction::create([
                 'user_id' => $user->id,
                 'type' => 'debit',
-                'category'=>'plan_purchase',
+                'category' => 'plan_purchase',
                 'amount' => $request->amount,
                 'balance_after' => $wallet->balance,
                 'transaction_reference' => 'plan_purchase',
