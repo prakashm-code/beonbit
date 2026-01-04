@@ -38,7 +38,11 @@ class CompleteUserPlans extends Command
         $count = 0;
 
         foreach ($plans as $plan) {
+            $wallet = $plan->user->wallet;
 
+            if (!$wallet) {
+                continue;
+            }
             $days = Carbon::parse($plan->start_date)
                 ->diffInDays(Carbon::parse($plan->end_date));
 
@@ -47,14 +51,14 @@ class CompleteUserPlans extends Command
 
             $maturedAmount = $plan->amount + $totalProfit;
 
-            $plan->status = 'completed';
-            $plan->total_interest = $maturedAmount;
-            $plan->save();
-
-            $wallet = $plan->user->wallet;
-            $wallet->locked_balance -= $plan->amount;
-            $wallet->balance += $maturedAmount;
+            $wallet->locked_balance = $wallet->locked_balance - $plan->amount;
+            $wallet->balance = $wallet->balance + $plan->amount + $totalProfit;
             $wallet->save();
+
+            // update plan
+            $plan->status = 'completed';
+            $plan->total_interest = $totalProfit; // only interest
+            $plan->save();
 
             $count++;
         }

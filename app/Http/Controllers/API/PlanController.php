@@ -92,10 +92,12 @@ class PlanController extends Controller
             'plan_id' => 'required|exists:plans,id',
             'amount'  => 'required|numeric|min:1'
         ]);
+
         DB::beginTransaction();
 
         try {
             $user = Auth::guard('api')->user();
+
             $plan = Plan::where('id', $request->plan_id)
                 ->where('status', 1)
                 ->firstOrFail();
@@ -109,32 +111,25 @@ class PlanController extends Controller
 
             $wallet = Wallet::firstOrCreate(
                 ['user_id' => $user->id],
-                ['balance' => 0]
+                ['balance' => 0, 'locked_balance' => 0]
             );
-            // dd($wallet);
-            if ($wallet->balance < $request->amount) {
-                return response()->json([
-                    'status' => 1,
-                    'message' => 'Insufficient wallet balance'
-                ], 200);
-            }
-            $wallet->balance -= $request->amount;
-            $wallet->locked_balance += $request->amount;
+
+            $wallet->locked_balance = ($wallet->locked_balance ?? 0) + $request->amount;
             $wallet->save();
 
             $dailyReturnPercent = $plan->daily_roi;
             $dailyInterestAmount = ($request->amount * $dailyReturnPercent) / 100;
 
-            $userPlan = UserPlan::create([
-                'user_id'        => $user->id,
-                'plan_id'        => $plan->id,
-                'amount'         => $request->amount,
+            UserPlan::create([
+                'user_id' => $user->id,
+                'plan_id' => $plan->id,
+                'amount'  => $request->amount,
                 'daily_return_percent' => $dailyReturnPercent,
                 'daily_interest' => $dailyInterestAmount,
                 'total_interest' => 0,
-                'start_date'     => now()->toDateString(),
-                'end_date'       => now()->addDays($plan->duration_days)->toDateString(),
-                'status'         => 'active'
+                'start_date' => now()->toDateString(),
+                'end_date' => now()->addDays($plan->duration_days)->toDateString(),
+                'status' => 'active'
             ]);
 
             Transaction::create([
@@ -142,12 +137,13 @@ class PlanController extends Controller
                 'type' => 'debit',
                 'category' => 'plan_purchase',
                 'amount' => $request->amount,
-                'balance_after' => $wallet->balance,
+                'balance_after' => $wallet->balance, // unchanged by design
                 'transaction_reference' => 'plan_purchase',
-                'description' => 'Plan purchase'
+                'description' => 'Plan purchased (amount locked)'
             ]);
 
             DB::commit();
+
             return response()->json([
                 'status' => 0,
                 'message' => 'Plan purchased successfully'
@@ -155,12 +151,13 @@ class PlanController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
-                'status'  => 1,
+                'status' => 1,
                 'message' => 'Plan not purchased successfully',
-                'error'   => $e->getMessage()
+                'error' => $e->getMessage()
             ], 500);
         }
     }
+
     public function myPlans(Request $request)
     {
         try {
