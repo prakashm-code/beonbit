@@ -108,7 +108,7 @@ class PlanController extends Controller
             }
 
             $wallet = Wallet::where('user_id', $user->id)->first();
-
+            dd($wallet);
             if ($wallet->balance < $request->amount) {
                 return response()->json([
                     'status' => 1,
