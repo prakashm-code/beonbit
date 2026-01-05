@@ -18,7 +18,7 @@ class WithdrawalController extends Controller
     {
         $request->validate([
             'amount' => 'required|numeric|min:1',
-    'transaction_method' => 'required|min:1',
+            'transaction_method' => 'required|min:1',
         ]);
 
         DB::beginTransaction();
