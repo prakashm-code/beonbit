@@ -29,6 +29,7 @@ class CompleteUserPlans extends Command
      */
     public function handle()
     {
+         Log::info('Maturity cron start');
         $today = Carbon::today();
 
         $plans = UserPlan::where('status', 'active')
