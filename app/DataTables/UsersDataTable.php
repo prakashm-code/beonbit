@@ -32,19 +32,26 @@ class UsersDataTable extends DataTable
             ->filter(function ($query) {
                 if ($this->request->has('search')) {
                     $keyword = trim($this->request->get('search')['value']);
+
                     if ($keyword !== '') {
-                        $keywords = explode(' ', $keyword);
+                        $keywords = preg_split('/\s+/', $keyword);
 
                         $query->where(function ($q) use ($keywords, $keyword) {
-                            foreach ($keywords as $word) {
-                                $q->orWhere(function ($subQuery) use ($word) {
-                                    $subQuery->where('first_name', 'LIKE', "%{$word}%")
-                                        ->orWhere('last_name', 'LIKE', "%{$word}%");
-                                });
-                            }
-                            $q->orWhere('email', 'LIKE', "%{$keyword}%");
-                            $q->orWhere('phone', 'LIKE', "%{$keyword}%");
-                            $q->orWhere('country', 'LIKE', "%{$keyword}%");
+
+                            // ✅ Name search: ALL words must match
+                            $q->where(function ($nameQuery) use ($keywords) {
+                                foreach ($keywords as $word) {
+                                    $nameQuery->where(function ($subQuery) use ($word) {
+                                        $subQuery->where('first_name', 'LIKE', "%{$word}%")
+                                            ->orWhere('last_name', 'LIKE', "%{$word}%");
+                                    });
+                                }
+                            })
+
+                                // ✅ Other fields: normal search
+                                ->orWhere('email', 'LIKE', "%{$keyword}%")
+                                ->orWhere('phone', 'LIKE', "%{$keyword}%")
+                                ->orWhere('country', 'LIKE', "%{$keyword}%");
                         });
                     }
                 }
