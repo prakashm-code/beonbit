@@ -93,7 +93,6 @@ class WithdrawDataTable extends DataTable
                 $edit_url = route('admin.referral_setting_edit', $cryptId);
 
                 return '<div class="action-icon" style="gap: 20px;display: flex">
-                             <a class="" href="' .  $edit_url . '" title="Edit"><i class="ti ti-edit"></i></a>
                             <form id="delete_referral_setting_form' . $template_delete . '" action="' . $delete_url . '" method="POST">' .
                     csrf_field() .
                     '<button style="background:transparent;border:none;"     type="button" data-id="' . $template_delete . '" class="deleteButton-Icon delete_referral_setting"><i class="ti ti-trash"></i></button></form>
