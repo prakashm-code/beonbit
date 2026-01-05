@@ -168,7 +168,7 @@ class WithdrawDataTable extends DataTable
             Column::make('status')->title('Status')->orderable(true),
             Column::make('method')->title('Method')->orderable(false),
             Column::make('created_at')->title(value: 'Request Date')->orderable(false),
-            Column::make('actions')->title('Actions')->orderable(false),
+            // Column::make('actions')->title('Actions')->orderable(false),
         ];
     }
 
