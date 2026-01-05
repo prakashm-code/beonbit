@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use App\Models\UserPlan;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CompleteUserPlans extends Command
 {
@@ -62,7 +63,9 @@ class CompleteUserPlans extends Command
 
             $count++;
         }
-
+        Log::info('Maturity cron finished', [
+            'completed_plans' => $count
+        ]);
         $this->info("Plans completed: {$count}");
     }
 }
