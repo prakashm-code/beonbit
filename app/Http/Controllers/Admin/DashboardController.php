@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Plan;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Models\UserPlan;
 use App\Models\Wallet;
 use App\Models\WithdrawRequest;
 use Illuminate\Http\Request;
@@ -22,6 +23,7 @@ class DashboardController extends Controller
         $totalWithdrawRequest = WithdrawRequest::where('status', 'pending')->count();
         $totalDeposit = Transaction::where('transaction_reference', 'TOPUP')->sum('amount');
         $totalTransaction = Transaction::count();
+        $totalActivePlans=UserPlan::where('status','active')->count();
         return view("layouts.admin.layout", compact(
             'title',
             'page',
@@ -29,6 +31,7 @@ class DashboardController extends Controller
             'totalPlans',
             'totalWithdrawRequest',
             'totalDeposit',
+            'totalActivePlans',
             'totalTransaction'
         ));
     }

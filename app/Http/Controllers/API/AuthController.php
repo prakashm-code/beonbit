@@ -162,7 +162,7 @@ class AuthController extends Controller
                     'name'             => $user->name,
                     'email'            => $user->email,
                     'phone'            => $user->phone,
-                    'profile' => asset('asstes/front/img/profile/' . $user->profile),
+                    'profile' => asset('assets/front/img/profile/' . $user->profile),
                     'country'          => $user->country,
                     'address'          => $user->address,
                     'id_proof'         => $user->id_proof,
@@ -186,6 +186,7 @@ class AuthController extends Controller
     }
     public function updateProfile(Request $request)
     {
+        // dd($request);
         try {
             DB::beginTransaction();
             $user = Auth::guard('api')->user();
