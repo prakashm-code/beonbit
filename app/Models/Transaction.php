@@ -12,6 +12,7 @@ class Transaction extends Model
         'type',
         'category',
         'amount',
+        'commission',
         'balance_after',
         'transaction_reference',
         'description',

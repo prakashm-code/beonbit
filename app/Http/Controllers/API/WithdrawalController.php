@@ -24,13 +24,12 @@ class WithdrawalController extends Controller
         DB::beginTransaction();
 
         try {
-
-            DB::beginTransaction();
-
             $user = Auth::guard('api')->user();
 
             // 1️⃣ Minimum withdrawal check
             if ($request->amount < 10) {
+                DB::rollBack();
+
                 return response()->json([
                     'status' => 1,
                     'message' => 'Minimum withdrawal amount is $10'
@@ -47,12 +46,13 @@ class WithdrawalController extends Controller
                 ['balance' => 0, 'locked_balance' => 0]
             );
 
+            // dd(1);
             if ($wallet->balance < $request->amount) {
                 DB::rollBack();
                 return response()->json([
                     'status' => 1,
                     'message' => 'Insufficient wallet balance'
-                ], 400);
+                ], 200);
             }
 
             $wallet->balance -= $request->amount;
@@ -60,20 +60,20 @@ class WithdrawalController extends Controller
             $wallet->save();
 
             $withdrawal = WithdrawRequest::create([
-                'user_id'            => $user->id,
-                'amount'             => $request->amount,
-                'commission'         => $commissionAmount,
-                'net_amount'         => $netAmount,
-                'method'             => $request->transaction_method,
-                'status'             => 'completed'
+                'user_id'    => $user->id,
+                'amount'     => $request->amount,
+                // 'commissio   ./n' => $commissionAmount,
+                'method'     => $request->transaction_method,
+                'status'     => 'completed',
             ]);
-
+            // ]);
+            // dd(1);
             Transaction::create([
                 'user_id' => $user->id,
                 'type' => 'debit',
                 'category' => 'withdrawal',
                 'amount' => $request->amount,
-                'commission'=>$commissionAmount,
+                'commission' => $commissionAmount,
                 'balance_after' => $wallet->balance,
                 'transaction_reference' => 'WD-' . uniqid(),
                 'description' => 'Wallet withdrawal'

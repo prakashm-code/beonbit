@@ -46,6 +46,8 @@ class TransactionsDataTable extends DataTable
                                 $q->where('email', 'LIKE', "%{$keyword}%");
                             });
                             $q->orWhere('Amount', 'LIKE', "%{$keyword}%");
+                            $q->orWhere('commission', 'LIKE', "%{$keyword}%");
+                            $q->orWhere('description', 'LIKE', "%{$keyword}%");
                             $q->orWhere('balance_after', 'LIKE', "%{$keyword}%");
                             $q->orWhere('transaction_reference', 'LIKE', "%{$keyword}%");
                             $q->orWhere('created_at', 'LIKE', "%{$keyword}%");
@@ -60,11 +62,15 @@ class TransactionsDataTable extends DataTable
                 return $row->user->email;
             })
             ->addColumn('type', function ($row) {
-                return $row->type;
+                return $row->description;
             })
             ->addColumn('amount', function ($row) {
                 return $row->amount;
             })
+            ->addColumn('commission', function ($row) {
+                return $row->commission;
+            })
+
             ->addColumn('balance_after', function ($row) {
                 return $row->balance_after;
             })
@@ -88,7 +94,7 @@ class TransactionsDataTable extends DataTable
                             </div>';
             })
 
-            ->rawColumns(['checkbox', 'email', 'type', 'amount', 'balance_after', 'transaction_reference', 'transaction_date', 'actions']);
+            ->rawColumns(['checkbox', 'email', 'type', 'amount','commission', 'balance_after', 'transaction_reference', 'transaction_date', 'actions']);
     }
 
     /**
@@ -103,9 +109,10 @@ class TransactionsDataTable extends DataTable
             1 => 'user_id',
             2 => 'type',
             3 => 'amount',
-            4 => 'balance_after',
-            5 => 'transaction_reference',
-            6 => 'transaction_date'
+            4 => 'commission',
+            5 => 'balance_after',
+            6 => 'transaction_reference',
+            7 => 'transaction_date'
         ];
 
         $orderIndex = $request->input('order.0.column', 0);
@@ -155,8 +162,9 @@ class TransactionsDataTable extends DataTable
             //     ->searchable(false),
             Column::make('no')->title('No')->orderable(false),
             Column::make('email')->title('Email')->orderable(true),
-            Column::make('type')->title('Plan')->orderable(true),
+            Column::make('type')->title('Type')->orderable(true),
             Column::make('amount')->title('Amount')->orderable(false),
+            Column::make('commission')->title('Commission')->orderable(false),
             Column::make('balance_after')->title('Balance After')->orderable(false),
             Column::make('transaction_reference')->title('Transaction Reference')->orderable(false),
             Column::make('transaction_date')->title('Transaction Date')->orderable(false),
