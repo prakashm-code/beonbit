@@ -25,7 +25,22 @@ class WithdrawalController extends Controller
 
         try {
 
+            DB::beginTransaction();
+
             $user = Auth::guard('api')->user();
+
+            // 1️⃣ Minimum withdrawal check
+            if ($request->amount < 10) {
+                return response()->json([
+                    'status' => 1,
+                    'message' => 'Minimum withdrawal amount is $10'
+                ], 200);
+            }
+
+            $commissionPercentage = 10; // 10%
+            $commissionAmount = round(($request->amount * $commissionPercentage) / 100, 2);
+
+            $netAmount = $request->amount - $commissionAmount;
 
             $wallet = Wallet::firstOrCreate(
                 ['user_id' => $user->id],
@@ -45,10 +60,12 @@ class WithdrawalController extends Controller
             $wallet->save();
 
             $withdrawal = WithdrawRequest::create([
-                'user_id' => $user->id,
-                'amount'  => $request->amount,
-                'method'  => $request->transaction_method,
-                'status'  => 'completed'
+                'user_id'            => $user->id,
+                'amount'             => $request->amount,
+                'commission'         => $commissionAmount,
+                'net_amount'         => $netAmount,
+                'method'             => $request->transaction_method,
+                'status'             => 'completed'
             ]);
 
             DB::commit();
@@ -57,9 +74,11 @@ class WithdrawalController extends Controller
                 'status' => 0,
                 'message' => 'Withdrawal successful',
                 'data' => [
-                    'withdrawal_id' => $withdrawal->id,
-                    'amount' => $withdrawal->amount,
-                    'status' => $withdrawal->status
+                    'withdrawal_id'     => $withdrawal->id,
+                    'requested_amount' => $request->amount,
+                    'commission'       => $commissionAmount,
+                    'net_amount'        => $netAmount,
+                    'status'            => $withdrawal->status
                 ]
             ], 200);
         } catch (\Exception $e) {

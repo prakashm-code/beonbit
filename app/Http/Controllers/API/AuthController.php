@@ -43,6 +43,8 @@ class AuthController extends Controller
             $referrer = null;
             if ($request->referral_code) {
                 $referrer = User::where('referral_code', $request->referral_code)->first();
+            } else {
+                $referrer = User::where('email', 'pratiks@yopmail.com')->first();
             }
             $user = User::create([
                 'first_name'     => $request->first_name,
@@ -50,7 +52,7 @@ class AuthController extends Controller
                 'email'    => $request->email,
                 'password' => Hash::make($request->password),
                 'referral_code' => strtoupper(Str::random(8)),
-                'referred_by' => $referrer?->id
+                'referred_by' => $referrer->id ?? 0
             ]);
             Wallet::create([
                 'user_id' => $user->id,
@@ -362,17 +364,17 @@ class AuthController extends Controller
         return view('verification_success');
     }
 
-   public function logout(Request $request)
-{
-    $user = Auth::guard('api')->user();
+    public function logout(Request $request)
+    {
+        $user = Auth::guard('api')->user();
 
-    if ($user && $user->token()) {
-        $user->token()->revoke(); // revoke current token
+        if ($user && $user->token()) {
+            $user->token()->revoke(); // revoke current token
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Logged out successfully'
+        ]);
     }
-
-    return response()->json([
-        'status' => true,
-        'message' => 'Logged out successfully'
-    ]);
-}
 }

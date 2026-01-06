@@ -8,9 +8,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Referral extends Model
 {
     protected $fillable = [
-        'user_id',
-        'parent_user_id',
-        'level'
+        'referrer_id',
+        'referred_id',
+        'level',
+        'income',
+        'source_type',
+        'source_id'
     ];
 
     public function user(): BelongsTo
