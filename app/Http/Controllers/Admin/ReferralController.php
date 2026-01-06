@@ -39,12 +39,14 @@ class ReferralController extends Controller
     {
         try {
             $validated = $request->validate([
-                'level'          => 'required',
+                'from_level'          => 'required',
+                'to_level'          => 'required',
                 'percentage'    => 'required',
             ]);
 
             $level = new ReferralSetting();
-            $level->level          = $validated['level'];
+            $level->from_level          = $validated['from_level'];
+            $level->to_level          = $validated['to_level'];
             $level->percentage    = $validated['percentage'];
             $level->save();
 
@@ -86,11 +88,13 @@ class ReferralController extends Controller
             $id = decrypt($id);
             $level = ReferralSetting::findOrFail($id);
             $validated = $request->validate([
-                'level'          => 'required',
+                'from_level'          => 'required',
+                'to_level'          => 'required',
                 'percentage'    => 'required',
             ]);
 
-            $level->level          = $validated['level'];
+            $level->from_level          = $validated['from_level'];
+            $level->to_level          = $validated['to_level'];
             $level->percentage    = $validated['percentage'];
 
             $level->save();

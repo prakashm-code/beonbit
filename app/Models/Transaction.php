@@ -14,7 +14,8 @@ class Transaction extends Model
         'amount',
         'balance_after',
         'transaction_reference',
-        'description'
+        'description',
+        'commission'
     ];
 
     protected $casts = [

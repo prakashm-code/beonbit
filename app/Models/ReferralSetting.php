@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class ReferralSetting extends Model
 {
     protected $fillable = [
-        'level',
+        'from_level',
+        'to_level',
         'percentage',
         'status'
     ];

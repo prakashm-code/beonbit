@@ -41,7 +41,8 @@ class ReferralSettingDataTable extends DataTable
                             //         $subQuery->where('level', 'LIKE', "%{$word}%");
                             //     });
                             // }
-                            $q->where('level', 'LIKE', "%{$keyword}%");
+                            $q->where('from_level', 'LIKE', "%{$keyword}%");
+                            $q->where('to_level', 'LIKE', "%{$keyword}%");
                             $q->orWhere('percentage', 'LIKE', "%{$keyword}%");
                         });
                     }
@@ -50,8 +51,11 @@ class ReferralSettingDataTable extends DataTable
             ->addColumn('checkbox', function ($row) {
                 return '<input type="checkbox" class="row-checkbox" value="' . $row->id . '">';
             })
-            ->addColumn('level', function ($row) {
-                return $row->level;
+            ->addColumn('from_level', function ($row) {
+                return $row->from_level;
+            })
+            ->addColumn('to_level', function ($row) {
+                return $row->to_level;
             })
             ->addColumn('percentage', function ($row) {
                 return $row->percentage;
@@ -76,7 +80,7 @@ class ReferralSettingDataTable extends DataTable
                             </div>';
             })
 
-            ->rawColumns(['checkbox', 'level', 'percentage', 'status', 'actions']);
+            ->rawColumns(['checkbox', 'from_level','to_level', 'percentage', 'status', 'actions']);
     }
 
     /**
@@ -88,16 +92,17 @@ class ReferralSettingDataTable extends DataTable
     {
         $columns = [
             0 => 'id',
-            1 => 'level',
-            2 => 'percentage',
-            3 => 'status',
+            1 => 'from_level',
+            2 => 'to_level',
+            3 => 'percentage',
+            4 => 'status',
         ];
 
         $orderIndex = $request->input('order.0.column', 0);
         $column = $columns[$orderIndex] ?? 'id';
 
 
-        $direction = 'desc';
+        $direction = 'asc';
 
         if (isset($request->order[0]['dir']) && $request->order[0]['dir'] == 'asc') {
             $direction = 'asc';
@@ -138,7 +143,8 @@ class ReferralSettingDataTable extends DataTable
             //     ->orderable(false)
             //     ->searchable(false),
             Column::make('no')->title('No')->orderable(false),
-            Column::make('level')->title('Level')->orderable(true),
+            Column::make('from_level')->title('From Level')->orderable(true),
+            Column::make('to_level')->title('To Level')->orderable(true),
             Column::make('percentage')->title('Commission %')->orderable(true),
             Column::make('status')->title('Status')->orderable(false),
             Column::make('actions')->title('Actions')->orderable(false),

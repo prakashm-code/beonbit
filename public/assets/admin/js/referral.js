@@ -1,32 +1,27 @@
 var base_url = $("#base_url").val();
+$.validator.addMethod("greaterThanOrEqual", function (value, element, param) {
+    var fromVal = parseFloat($(param).val());
+    var toVal = parseFloat(value);
 
+    if (isNaN(fromVal) || isNaN(toVal)) {
+        return true; // let required/number handle empty
+    }
+
+    return toVal >= fromVal;
+}, "Ending level must be greater than or equal to starting level");
 $("#add_referral_form").validate({
     onfocusout: function (element) {
         $(element).valid();
     },
 
     rules: {
-        level: {
+        from_level: {
             required: true,
-            // minlength: 2,
-            // remote: {
-            //     depends: function () {
-            //         return $("#name").val().length > 0;
-            //     },
-            //     url: base_url + "/admin/plans/check_name",
-            //     type: "POST",
-            //     headers: {
-            //         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
-            //     },
-            //     data: {
-            //         name: function () {
-            //             return $("#name").val();
-            //         },
-            //         id: function () {
-            //             return $("#plan_id").val() ?? null; // for edit mode
-            //         }
-            //     }
-            // }
+        },
+        to_level: {
+            required: true,
+            greaterThanOrEqual: "#from_level"
+
         },
 
         percentage: {
@@ -36,12 +31,16 @@ $("#add_referral_form").validate({
     },
 
     messages: {
-        level: {
-            required: "Please enter referral level",
+        from_level: {
+            required: "Please enter starting referral level",
             // minlength: "Plan name must be at least 2 characters",
             // remote: "Plan with this name already exists"
         },
+        to_level: {
+            required: "Please enter ending referral level",
+            greaterThanOrEqual: "Ending level must be greater than or equal to starting level"
 
+        },
         percentage: {
             required: "Please enter commission percentage",
             // min: "Minimum amount must be at least 1"

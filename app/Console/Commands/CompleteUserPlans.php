@@ -29,7 +29,7 @@ class CompleteUserPlans extends Command
      */
     public function handle()
     {
-         Log::info('Maturity cron start');
+        Log::info('Maturity cron start');
         $today = Carbon::today();
 
         $plans = UserPlan::where('status', 'active')
@@ -63,6 +63,8 @@ class CompleteUserPlans extends Command
             $plan->save();
 
             $count++;
+
+            distributeReferralCommission($plan->user_id, $maturedAmount);
         }
         Log::info('Maturity cron finished', [
             'completed_plans' => $count

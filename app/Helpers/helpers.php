@@ -2,6 +2,7 @@
 
 use App\Models\Referral;
 use App\Models\ReferralSetting;
+use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Support\Facades\DB;
@@ -69,6 +70,8 @@ function distributeReferralCommission(
                     Wallet::where('user_id', $parentId)
                         ->increment('balance', $commission);
 
+                    $wallet = Wallet::where('user_id', $parentId)->first();
+
                     Referral::create([
                         'referrer_id' => $parentId,
                         'referred_id' => $userId,
@@ -76,6 +79,16 @@ function distributeReferralCommission(
                         'income' => $commission,
                         // 'source_type' => $sourceType,
                         // 'source_id' => $sourceId,
+                    ]);
+
+                    Transaction::create([
+                        'user_id'               => $parentId,
+                        'type'                  => 'credit',
+                        'category'              => 'referral',
+                        'amount'                => $commission,
+                        'balance_after'         => $wallet->balance,
+                        'transaction_reference' => 'referral_commission',
+                        'description'           => 'Referral commission (Level ' . $level . ')',
                     ]);
                 }
             }

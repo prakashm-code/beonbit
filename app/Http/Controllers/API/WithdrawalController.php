@@ -68,6 +68,17 @@ class WithdrawalController extends Controller
                 'status'             => 'completed'
             ]);
 
+            Transaction::create([
+                'user_id' => $user->id,
+                'type' => 'debit',
+                'category' => 'withdrawal',
+                'amount' => $request->amount,
+                'commission'=>$commissionAmount,
+                'balance_after' => $wallet->balance,
+                'transaction_reference' => 'WD-' . uniqid(),
+                'description' => 'Wallet withdrawal'
+            ]);
+
             DB::commit();
 
             return response()->json([
