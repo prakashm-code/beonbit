@@ -52,7 +52,7 @@ class AuthController extends Controller
                 'email'    => $request->email,
                 'password' => Hash::make($request->password),
                 'referral_code' => strtoupper(Str::random(8)),
-                'referred_by' => $referrer->id ?? 0
+                'referred_by' => $referrer ? $referrer->id : null
             ]);
             Wallet::create([
                 'user_id' => $user->id,

@@ -30,9 +30,10 @@ Route::group(['middleware' => CheckUser::class], function () {
 
     Route::post('/add_wallet_balance', [WalletController::class, 'addMoney']);
     Route::get('/get_wallet_balance', [WalletController::class, 'getWallet']);
-
     Route::post('/get_transactions', [WalletController::class, 'transactions']);
+
     Route::get('/referral_earning', [ReferralController::class, 'earnings']);
+    Route::get('/my_referrals_levelwise', [ReferralController::class, 'myReferralsLevelWise']);
 
 
     Route::post('/withdraw_list', [WithdrawalController::class, 'history']);
