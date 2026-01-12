@@ -112,7 +112,7 @@ class TransactionsDataTable extends DataTable
             4 => 'commission',
             5 => 'balance_after',
             6 => 'transaction_reference',
-            7 => 'transaction_date'
+            7 => 'created_at'
         ];
 
         $orderIndex = $request->input('order.0.column', 0);
