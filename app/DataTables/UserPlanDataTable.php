@@ -111,7 +111,7 @@ class UserPlanDataTable extends DataTable
                 2 => 'plan_name',
                 3 => 'start_date',
                 4 => 'end_date',
-                5 => 'daily_return_percent',
+                5 => 'amount',
                 6 => 'status'
             ];
 
