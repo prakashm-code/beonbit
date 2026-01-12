@@ -64,7 +64,7 @@ class WithdrawalController extends Controller
                 'amount'     => $request->amount,
                 // 'commissio   ./n' => $commissionAmount,
                 'method'     => $request->transaction_method,
-                'status'     => 'completed',
+                'status'     => 'approved',
             ]);
             // ]);
             // dd(1);
@@ -75,7 +75,7 @@ class WithdrawalController extends Controller
                 'amount' => $request->amount,
                 'commission' => $commissionAmount,
                 'balance_after' => $wallet->balance,
-                'transaction_reference' => 'WD-' . uniqid(),
+                'transaction_reference' => 'Withdrawal',
                 'description' => 'Wallet withdrawal'
             ]);
 

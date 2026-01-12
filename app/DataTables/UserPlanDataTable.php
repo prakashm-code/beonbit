@@ -2,6 +2,8 @@
 
 namespace App\DataTables;
 
+use App\Models\Plan;
+use App\Models\User;
 use App\Models\UserPlan;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Yajra\DataTables\EloquentDataTable;
@@ -101,30 +103,56 @@ class UserPlanDataTable extends DataTable
      *
      * @return QueryBuilder<UserPlan>
      */
-    public function query(UserPlan $model, Request $request): QueryBuilder
-    {
-        $columns = [
-            0 => 'id',
-            1 => 'user_id',
-            2 => 'plan_id',
-            3 => 'start_date',
-            4 => 'end_date',
-            5 => 'daily_return_percent',
-            6 => 'status'
-        ];
+        public function query(UserPlan $model, Request $request): QueryBuilder
+        {
+            $columns = [
+                0 => 'id',
+                1 => 'user_email',
+                2 => 'plan_name',
+                3 => 'start_date',
+                4 => 'end_date',
+                5 => 'daily_return_percent',
+                6 => 'status'
+            ];
 
-        $orderIndex = $request->input('order.0.column', 0);
-        $column = $columns[$orderIndex] ?? 'id';
+            $orderIndex = $request->input('order.0.column', 0);
+            $column = $columns[$orderIndex] ?? 'id';
 
 
-        $direction = 'desc';
+            $direction = 'desc';
 
-        if (isset($request->order[0]['dir']) && $request->order[0]['dir'] == 'asc') {
-            $direction = 'asc';
-        }
+            if (isset($request->order[0]['dir']) && $request->order[0]['dir'] == 'asc') {
+                $direction = 'asc';
+            }
 
-        return UserPlan::query()->with('user', 'plan')->orderBy($column, $direction);
+            // return UserPlan::query()->with('user', 'plan')->orderBy($column, $direction);
+         $query = UserPlan::query()->with('user', 'plan');
+
+    // 🔥 ORDER BY USER EMAIL
+    if ($column === 'user_email') {
+        $query->orderBy(
+            User::select('email')
+                ->whereColumn('users.id', 'user_plans.user_id'),
+            $direction
+        );
     }
+
+    // 🔥 ORDER BY PLAN NAME
+    elseif ($column === 'plan_name') {
+        $query->orderBy(
+            Plan::select('name')
+                ->whereColumn('plans.id', 'user_plans.plan_id'),
+            $direction
+        );
+    }
+
+    // 🔥 ORDER BY OWN COLUMNS
+    else {
+        $query->orderBy($column, $direction);
+    }
+
+    return $query;
+            }
 
     /**
      * Optional method if you want to use the html builder.
