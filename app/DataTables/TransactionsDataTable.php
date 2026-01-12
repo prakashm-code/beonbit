@@ -65,14 +65,14 @@ class TransactionsDataTable extends DataTable
                 return $row->description;
             })
             ->addColumn('amount', function ($row) {
-                return $row->amount;
+                return '$'.$row->amount;
             })
             ->addColumn('commission', function ($row) {
-                return $row->commission;
+                return '$'.$row->commission;
             })
 
             ->addColumn('balance_after', function ($row) {
-                return $row->balance_after;
+                return '$'.$row->balance_after;
             })
             ->addColumn('transaction_reference', function ($row) {
                 return $row->transaction_reference;
