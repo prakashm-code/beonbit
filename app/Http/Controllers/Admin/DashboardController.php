@@ -20,7 +20,7 @@ class DashboardController extends Controller
 
         $totalUser = User::count();
         $totalPlans = Plan::count();
-        $totalWithdrawRequest = WithdrawRequest::where('status', 'pending')->count();
+        $totalWithdrawRequest = WithdrawRequest::where('status', 'approved')->count();
         $totalDeposit = Transaction::where('transaction_reference', 'TOPUP')->sum('amount');
         $totalTransaction = Transaction::count();
         $totalActivePlans=UserPlan::where('status','active')->count();
