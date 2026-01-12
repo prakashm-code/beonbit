@@ -163,7 +163,7 @@ class UserPlanDataTable extends DataTable
             Column::make('plan')->title('Plan')->orderable(true),
             Column::make('start_date')->title('Start Date')->orderable(false),
             Column::make('end_date')->title('End Date')->orderable(false),
-            Column::make('amount')->title('Amount')->orderable(false),
+            Column::make('amount')->title('Amount($)')->orderable(false),
             Column::make('status')->title('Status')->orderable(false),
             // Column::make('actions')->title('Actions')->orderable(false)
         ];
