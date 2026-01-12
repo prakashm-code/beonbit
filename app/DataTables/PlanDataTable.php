@@ -59,10 +59,10 @@ class PlanDataTable extends DataTable
                 return $row->name;
             })
             ->addColumn('max_amount', function ($row) {
-                return $row->max_amount;
+                return '$'.$row->max_amount;
             })
             ->addColumn('min_amount', function ($row) {
-                return $row->min_amount;
+                return '$'.$row->min_amount;
             })
             ->addColumn('roi', function ($row) {
                 return $row->daily_roi;
@@ -168,8 +168,8 @@ class PlanDataTable extends DataTable
             //     ->searchable(false),
             Column::make('no')->title('No')->orderable(false),
             Column::make('name')->orderable(true),
-            Column::make('min_amount')->title('Min Amount')->orderable(true),
-            Column::make('max_amount')->title('Max Amount')->orderable(false),
+            Column::make('min_amount')->title('Min Amount($)')->orderable(true),
+            Column::make('max_amount')->title('Max Amount($)')->orderable(false),
             Column::make('roi')->title('ROI')->orderable(false),
             Column::make('duration')->title('Duration')->orderable(false),
             Column::make('type')->title('Type')->orderable(false),
