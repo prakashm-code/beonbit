@@ -163,9 +163,9 @@ class TransactionsDataTable extends DataTable
             Column::make('no')->title('No')->orderable(false),
             Column::make('email')->title('Email')->orderable(true),
             Column::make('type')->title('Type')->orderable(true),
-            Column::make('amount')->title('Amount')->orderable(false),
-            Column::make('commission')->title('Commission')->orderable(false),
-            Column::make('balance_after')->title('Balance After')->orderable(false),
+            Column::make('amount')->title('Amount($)')->orderable(false),
+            Column::make('commission')->title('Commission($)')->orderable(false),
+            Column::make('balance_after')->title('Balance After($)')->orderable(false),
             Column::make('transaction_reference')->title('Transaction Reference')->orderable(false),
             Column::make('transaction_date')->title('Transaction Date')->orderable(false),
             // Column::make('actions')->title('Actions')->orderable(false)

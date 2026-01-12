@@ -59,7 +59,7 @@ class WithdrawDataTable extends DataTable
                 return $row->user->email;
             })
             ->addColumn('amount', function ($row) {
-                return $row->amount;
+                return '$'.$row->amount;
             })
             ->addColumn('status', function ($row) {
 
@@ -164,7 +164,7 @@ class WithdrawDataTable extends DataTable
             //     ->searchable(false),
             Column::make('no')->title('No')->orderable(false),
             Column::make('email')->title('Email')->orderable(false),
-            Column::make('amount')->title('Withdarwal Amount')->orderable(true),
+            Column::make('amount')->title('Withdarwal Amount($)')->orderable(true),
             Column::make('status')->title('Status')->orderable(true),
             Column::make('method')->title('Method')->orderable(false),
             Column::make('created_at')->title(value: 'Request Date')->orderable(false),
