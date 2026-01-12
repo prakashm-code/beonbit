@@ -172,7 +172,7 @@ class PlanDataTable extends DataTable
             Column::make('max_amount')->title('Max Amount($)')->orderable(true),
             Column::make('roi')->title('ROI')->orderable(true),
             Column::make('duration')->title('Duration')->orderable(true),
-            Column::make('type')->title('Type')->orderable(true),
+            Column::make('type')->title('Type')->orderable(false),
             Column::make('status')->title('Status')->orderable(false),
             Column::make('actions')->title('Actions')->orderable(false),
         ];
