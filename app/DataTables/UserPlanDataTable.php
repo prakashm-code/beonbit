@@ -73,7 +73,7 @@ class UserPlanDataTable extends DataTable
                 return $row->end_date;
             })
             ->addColumn('amount', function ($row) {
-                return $row->amount;
+                return '$'.$row->amount;
             })
             ->addColumn('status', function ($row) {
                 return $row->status;
