@@ -91,9 +91,10 @@ $(document).on('input', '.only-number', function () {
 
 $(document).on('input', '.only-decimal', function () {
     this.value = this.value
-        .replace(/[^0-9.]/g, '')   // allow only numbers & dot
-        .replace(/(\..*)\./g, '$1'); // prevent more than one dot
+        .replace(/[^0-9.]/g, '')
+        .replace(/(\..*)\./g, '$1');
 });
+
 
 $.validator.addMethod("withinPlanRange", function (value, element) {
     let plan = $("#plan_id option:selected");
