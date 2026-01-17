@@ -48,9 +48,9 @@ class ReferralSettingDataTable extends DataTable
                     }
                 }
             })
-            ->addColumn('checkbox', function ($row) {
-                return '<input type="checkbox" class="row-checkbox" value="' . $row->id . '">';
-            })
+            // ->addColumn('checkbox', function ($row) {
+            //     return '<input type="checkbox" class="row-checkbox" value="' . $row->id . '">';
+            // })
             ->addColumn('from_level', function ($row) {
                 return $row->from_level;
             })
@@ -80,7 +80,7 @@ class ReferralSettingDataTable extends DataTable
                             </div>';
             })
 
-            ->rawColumns(['checkbox', 'from_level','to_level', 'percentage', 'status', 'actions']);
+            ->rawColumns(['from_level','to_level', 'percentage', 'status', 'actions']);
     }
 
     /**
@@ -105,7 +105,7 @@ class ReferralSettingDataTable extends DataTable
         $direction = 'asc';
 
         if (isset($request->order[0]['dir']) && $request->order[0]['dir'] == 'asc') {
-            $direction = 'asc';
+            $direction = 'desc';
         }
 
         return ReferralSetting::query()->orderBy($column, $direction);
@@ -120,7 +120,7 @@ class ReferralSettingDataTable extends DataTable
             ->setTableId('referralsetting-table')
             ->columns($this->getColumns())
             ->minifiedAjax()
-            ->orderBy(0)
+            ->orderBy(1)
             ->selectStyleSingle()
             ->buttons([
                 Button::make('excel'),
