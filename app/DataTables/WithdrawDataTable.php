@@ -163,11 +163,11 @@ class WithdrawDataTable extends DataTable
             //     ->orderable(false)
             //     ->searchable(false),
             Column::make('no')->title('No')->orderable(false),
-            Column::make('email')->title('Email')->orderable(false),
+            Column::make('email')->title('Email')->orderable(true),
             Column::make('amount')->title('Withdarwal Amount($)')->orderable(true),
             Column::make('status')->title('Status')->orderable(true),
-            Column::make('method')->title('Method')->orderable(false),
-            Column::make('created_at')->title(value: 'Request Date')->orderable(false),
+            Column::make('method')->title('Method')->orderable(true),
+            Column::make('created_at')->title(value: 'Request Date')->orderable(true),
             // Column::make('actions')->title('Actions')->orderable(false),
         ];
     }
