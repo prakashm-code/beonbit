@@ -19,7 +19,7 @@
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a class="sidebar-link {{ in_array(Request::segment(2), ['user', 'add_user', 'edit_user']) ? 'active' : '' }}"
+                    <a class="sidebar-link {{ in_array(Request::segment(2), ['user', 'add_user', 'edit_user','add_user_plans']) ? 'active' : '' }}"
                         href="{{ route('admin.user') }}" aria-expanded="false">
                         <i class="ti ti-user-circle"></i>
                         <span class="hide-menu">Users</span>
