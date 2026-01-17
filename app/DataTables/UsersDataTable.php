@@ -71,6 +71,18 @@ class UsersDataTable extends DataTable
             ->addColumn('country', function ($row) {
                 return $row->country;
             })
+
+              ->addColumn('add_plan', function ($row) {
+                    $cryptId = encrypt($row->id);
+                $template_delete = decrypt($cryptId);
+                $add_plan_url = route('admin.add_user_plan', $cryptId);
+                // $edit_url = "";
+
+                return '<div class="action-icon" style="gap: 20px;display: flex">
+                            <a class="" href="' .  $add_plan_url . '" title="Edit"><i class="ti ti-edit"></i></a
+                            </div>';
+
+            })
             ->addColumn('actions', function ($row) {
                 $cryptId = encrypt($row->id);
                 $template_delete = decrypt($cryptId);
@@ -92,7 +104,7 @@ class UsersDataTable extends DataTable
                             </div>';
             })
 
-            ->rawColumns(['checkbox', 'name', 'email', 'phone', 'country', 'actions']);
+            ->rawColumns(['checkbox', 'name', 'email', 'phone', 'country','add_plan', 'actions']);
     }
 
     /**
@@ -159,6 +171,7 @@ class UsersDataTable extends DataTable
             Column::make('email')->title('Email')->orderable(true),
             Column::make('phone')->title('Phone no')->orderable(true),
             Column::make('country')->title('Country')->orderable(true),
+            Column::make('add_plan')->title('Add Plan')->orderable(true),
             Column::make('actions')->title('Actions')->orderable(false),
         ];
     }

@@ -1,7 +1,7 @@
 var base_url = $("#base_url").val();
 $("#add_user_form").validate({
     // onkeyup: false,
-        onfocusout: function (element) {
+    onfocusout: function (element) {
         $(element).valid();
     },
     rules: {
@@ -61,6 +61,76 @@ $("#add_user_form").validate({
         c_password: {
             required: "Please confirm password",
             equalTo: "Password and confirm password must match"
+        }
+    },
+    normalizer: function (value) {
+        return $.trim(value);
+    },
+
+    errorClass: "text-danger",
+    errorElement: "span",
+    highlight: function (element) {
+        $(element).addClass("is-invalid");
+    },
+    unhighlight: function (element) {
+        $(element).removeClass("is-invalid");
+    },
+    submitHandler: function (form) {
+        $(form)
+            .find('button[type="submit"]')
+            .prop("disabled", true)
+            .text("Please wait...");
+
+        form.submit();
+    },
+});
+
+$(document).on('input', '.only-number', function () {
+    this.value = this.value.replace(/[^0-9]/g, '');
+});
+
+$(document).on('input', '.only-decimal', function () {
+    this.value = this.value
+        .replace(/[^0-9.]/g, '')   // allow only numbers & dot
+        .replace(/(\..*)\./g, '$1'); // prevent more than one dot
+});
+
+$.validator.addMethod("withinPlanRange", function (value, element) {
+    let plan = $("#plan_id option:selected");
+    let min = parseFloat(plan.data("min"));
+    let max = parseFloat(plan.data("max"));
+    let amount = parseFloat(value);
+
+    if (!plan.val()) {
+        return false; // no plan selected
+    }
+
+    return amount >= min && amount <= max;
+}, "Amount must be between selected plan's minimum and maximum");
+
+$("#add_plan_user_form").validate({
+    // onkeyup: false,
+    onfocusout: function (element) {
+        $(element).valid();
+    },
+    rules: {
+        plan_id: {
+            required: true,
+        },
+        amount: {
+            required: true,
+            withinPlanRange: true   // ✅ YOUR NEW RULE
+
+        }
+    },
+    messages: {
+        plan_id: {
+            required: "Please choose a plan",
+        },
+        amount: {
+            required: "Please enter amount",
+            withinPlanRange: "Amount must be within selected plan limit"
+
         }
     },
     normalizer: function (value) {

@@ -32,6 +32,8 @@ Route::middleware(AdminAuth::class, NoCache::class)->group(function () {
     Route::post('admin/delete_multiple_user', [UserController::class, 'deleteMultiple'])->name('admin.delete_multiple_user');
     Route::post('admin/check_user_is_exist', [UserController::class, 'checkUserIsExist'])->name('admin.user_check_exist');
     Route::get('admin/user_plans', [UserController::class, 'UserPlans'])->name('admin.user_plan');
+    Route::get('admin/add_user_plans/{id}', [UserController::class, 'AddUserPlan'])->name('admin.add_user_plan');
+    Route::post('admin/user_plan_store', [UserController::class, 'StoreUserPlan'])->name('admin.user_plan_store');
 
     Route::get('admin/term_conditions', [TermConditionController::class, 'index'])->name('admin.term_conditions');
     Route::post('admin/term_conditions_store', [TermConditionController::class, 'store'])->name('admin.term_conditions_store');

@@ -11,6 +11,10 @@ use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use App\DataTables\UserPlanDataTable;
+use App\Models\Plan;
+use App\Models\Transaction;
+use App\Models\UserPlan;
+use App\Models\Wallet;
 
 class UserController extends Controller
 {
@@ -150,5 +154,87 @@ class UserController extends Controller
         $page = 'admin.user.user_plan_list';
         $js = ['user'];
         return $DataTable->render('layouts.admin.layout', compact('title', 'page', 'js'));
+    }
+
+     public function AddUserPlan(string $id)
+    {
+        $title = 'Add Plans';
+        $page = 'admin.user.add_plan';
+        $js = ['user'];
+        $getplans = Plan::where('status','1')->get();
+        $user_id= decrypt($id);
+        $user_email= User::where('id',$user_id)->select('email')->first();
+        return view("layouts.admin.layout", compact(
+            'title',
+            'page',
+            'js',
+            'user_id',
+            'user_email',
+            'getplans'
+        ));
+    }
+     public function StoreUserPlan(Request $request)
+    {
+         $request->validate([
+            'plan_id' => 'required|exists:plans,id',
+            'amount'  => 'required|numeric|min:1'
+        ]);
+
+        DB::beginTransaction();
+        $user_id=$request->user_id;
+        try {
+            $plan = Plan::where('id', $request->plan_id)
+                ->where('status', 1)
+                ->firstOrFail();
+
+            if ($request->amount < $plan->min_amount || $request->amount > $plan->max_amount) {
+                return response()->json([
+                    'status' => 1,
+                    'message' => 'Invalid amount for this plan'
+                ], 200);
+            }
+
+            $wallet = Wallet::firstOrCreate(
+                ['user_id' => $user_id],
+                ['balance' => 0, 'locked_balance' => 0]
+            );
+
+            $wallet->locked_balance = ($wallet->locked_balance ?? 0) + $request->amount;
+            $wallet->save();
+
+            $dailyReturnPercent = $plan->daily_roi;
+            $dailyInterestAmount = ($request->amount * $dailyReturnPercent) / 100;
+
+            UserPlan::create([
+                'user_id' => $user_id,
+                'plan_id' => $plan->id,
+                'amount'  => $request->amount,
+                'daily_return_percent' => $dailyReturnPercent,
+                'daily_interest' => $dailyInterestAmount,
+                'total_interest' => 0,
+                'start_date' => now()->toDateString(),
+                'end_date' => now()->addDays($plan->duration_days)->toDateString(),
+                'status' => 'active'
+            ]);
+
+            Transaction::create([
+                'user_id' => $user_id,
+                'type' => 'debit',
+                'category' => 'plan_purchase',
+                'amount' => $request->amount,
+                'balance_after' => $wallet->balance, // unchanged by design
+                'transaction_reference' => 'plan_purchase',
+                'description' => 'Plan purchased (amount locked)'
+            ]);
+
+            DB::commit();
+
+           return redirect()->route('admin.user')
+                ->with('msg_success', 'User plan added successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+          return redirect()->route('admin.user')
+                ->with('msg_error', 'User plan not added successfully');
+        }
     }
 }
