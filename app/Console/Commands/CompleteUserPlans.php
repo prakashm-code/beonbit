@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Transaction;
 use Illuminate\Console\Command;
 use App\Models\UserPlan;
 use Carbon\Carbon;
@@ -29,46 +30,113 @@ class CompleteUserPlans extends Command
      */
     public function handle()
     {
-        Log::info('Maturity cron start');
+        // Log::info('Maturity cron start');
+
         $today = Carbon::today();
 
         $plans = UserPlan::where('status', 'active')
-            ->whereDate('end_date', '<=', $today)
             ->with(['user.wallet'])
             ->get();
 
         $count = 0;
 
         foreach ($plans as $plan) {
+
             $wallet = $plan->user->wallet;
 
             if (!$wallet) {
                 continue;
             }
-            $days = Carbon::parse($plan->start_date)
-                ->diffInDays(Carbon::parse($plan->end_date));
+
+            $start = Carbon::parse($plan->start_date);
+            $end   = Carbon::parse($plan->end_date);
+
+            // If plan not started yet, skip
+            if ($today->lt($start)) {
+                continue;
+            }
 
             $dailyProfit = ($plan->amount * $plan->daily_return_percent) / 100;
-            $totalProfit = $dailyProfit * $days;
 
-            $maturedAmount = $plan->amount + $totalProfit;
+            // Determine last credited date
+            $lastCredited = $plan->last_interest_date
+                ? Carbon::parse($plan->last_interest_date)
+                : Carbon::parse($plan->start_date);
 
-            $wallet->locked_balance = $wallet->locked_balance - $plan->amount;
-            $wallet->balance = $wallet->balance + $plan->amount + $totalProfit;
-            $wallet->save();
+            /**
+             * -----------------------------
+             * CASE 1: DAILY INTEREST (till today but not beyond end date)
+             * -----------------------------
+             */
+            if ($today->lte($end)) {
 
-            // update plan
-            $plan->status = 'completed';
-            $plan->total_interest = $totalProfit; // only interest
-            $plan->save();
+                $daysToCredit = $lastCredited->diffInDays($today);
 
-            $count++;
+                if ($daysToCredit > 0) {
 
-            distributeReferralCommission($plan->user_id, $maturedAmount);
+                    $totalInterest = $dailyProfit * $daysToCredit;
+
+                    $wallet->balance += $totalInterest;
+                    $wallet->save();
+
+                    // Track total earned interest
+                    $plan->increment('total_interest', $totalInterest);
+
+                    Transaction::create([
+                        'user_id' => $plan->user_id,
+                        'type' => 'credit',
+                        'category' => 'Interest',
+                        'amount' => $totalInterest,
+                        'commission' => 0,
+                        'balance_after' => $wallet->balance,
+                        'transaction_reference' => 'Daily Interest',
+                        'description' => 'Plan daily interest'
+                    ]);
+
+                    // Update last credited date to today
+                    $plan->last_interest_date = $today;
+                    $plan->save();
+
+                    Log::info("Interest credited", [
+                        'user_id' => $plan->user_id,
+                        'days' => $daysToCredit,
+                        'amount' => $totalInterest
+                    ]);
+                }
+            }
+
+            /**
+             * -----------------------------
+             * CASE 2: MATURITY (end date reached)
+             * -----------------------------
+             */
+            if ($today->equalTo($end)) {
+
+                if ($wallet->locked_balance < $plan->amount) {
+                    // Log::error("Locked balance mismatch", [
+                    //     'user_id' => $plan->user_id
+                    // ]);
+                    continue;
+                }
+
+                $wallet->locked_balance -= $plan->amount;
+                $wallet->balance += $plan->amount;
+                $wallet->save();
+
+                $plan->status = 'completed';
+                $plan->save();
+
+                // Referral commission on principal only
+                distributeReferralCommission($plan->user_id, $plan->amount);
+
+                $count++;
+            }
         }
-        Log::info('Maturity cron finished', [
-            'completed_plans' => $count
-        ]);
+
+        // Log::info('Maturity cron finished', [
+        //     'completed_plans' => $count
+        // ]);
+
         $this->info("Plans completed: {$count}");
     }
 }
