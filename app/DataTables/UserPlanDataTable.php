@@ -69,10 +69,11 @@ class UserPlanDataTable extends DataTable
                 return $row->plan->name;
             })
             ->addColumn('start_date', function ($row) {
-                return $row->start_date;
+                // return $row->start_date;
+                    return \Carbon\Carbon::parse($row->start_date)->format('d-m-Y');
             })
             ->addColumn('end_date', function ($row) {
-                return $row->end_date;
+                    return \Carbon\Carbon::parse($row->end_date)->format('d-m-Y');
             })
             ->addColumn('amount', function ($row) {
                 return '$'.$row->amount;

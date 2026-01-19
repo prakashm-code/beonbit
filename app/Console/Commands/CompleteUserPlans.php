@@ -97,6 +97,8 @@ class CompleteUserPlans extends Command
                     $plan->last_interest_date = $today;
                     $plan->save();
 
+                distributeReferralCommission($plan->user_id, $totalInterest);
+
                     Log::info("Interest credited", [
                         'user_id' => $plan->user_id,
                         'days' => $daysToCredit,
@@ -127,7 +129,7 @@ class CompleteUserPlans extends Command
                 $plan->save();
 
                 // Referral commission on principal only
-                distributeReferralCommission($plan->user_id, $plan->amount);
+                // distributeReferralCommission($plan->user_id, $plan->amount);
 
                 $count++;
                 Transaction::create([

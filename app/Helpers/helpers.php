@@ -87,7 +87,7 @@ function distributeReferralCommission(
                         'category'              => 'referral',
                         'amount'                => $commission,
                         'balance_after'         => $wallet->balance,
-                        'transaction_reference' => 'referral_commission',
+                        'transaction_reference' => 'Referral commission (Level ' . $level . ')',
                         'description'           => 'Referral commission (Level ' . $level . ')',
                     ]);
                 }
