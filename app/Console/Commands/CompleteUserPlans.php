@@ -133,12 +133,12 @@ class CompleteUserPlans extends Command
                 Transaction::create([
                     'user_id' => $plan->user_id,
                     'type' => 'credit',
-                    'category' => 'Maturity',
+                    'category' => 'Plan Maturity',
                     'amount' => $plan->amount,
                     'commission' => 0,
                     'balance_after' => $wallet->balance,
                     'transaction_reference' => 'Plan Maturity',
-                    'description' => 'Principal amount released on plan maturity'
+                    'description' => 'Plan Maturity(amount unlocked)'
                 ]);
             }
         }
