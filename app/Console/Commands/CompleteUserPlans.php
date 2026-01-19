@@ -130,6 +130,16 @@ class CompleteUserPlans extends Command
                 distributeReferralCommission($plan->user_id, $plan->amount);
 
                 $count++;
+                Transaction::create([
+                    'user_id' => $plan->user_id,
+                    'type' => 'credit',
+                    'category' => 'Maturity',
+                    'amount' => $plan->amount,
+                    'commission' => 0,
+                    'balance_after' => $wallet->balance,
+                    'transaction_reference' => 'Plan Maturity',
+                    'description' => 'Principal amount released on plan maturity'
+                ]);
             }
         }
 
