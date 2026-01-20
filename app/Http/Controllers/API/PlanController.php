@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\PlanResource;
+use App\Models\Referral;
+use App\Models\User;
 use Carbon\Carbon;
 
 class PlanController extends Controller
@@ -142,6 +144,63 @@ class PlanController extends Controller
                 'description' => 'Plan purchased (amount locked)'
             ]);
 
+
+
+       $planCount = UserPlan::where('user_id', $user->id)->count();
+
+if ($planCount === 1) {   // FIRST PLAN ONLY
+
+    // ✅ STATIC LEVELS & PERCENTAGES
+    $levels = [
+        1 => 5, // Level 1 = 5%
+        2 => 3, // Level 2 = 3%
+        3 => 1, // Level 3 = 1%
+    ];
+
+    $currentUser = $user;
+
+    foreach ($levels as $level => $percent) {
+
+        if (!$currentUser->referred_by) {
+            break;
+        }
+
+        $parentId = $currentUser->referred_by;
+
+        $commission = round(($request->amount * $percent) / 100, 2);
+
+        if ($commission > 0) {
+
+            $refWallet = Wallet::firstOrCreate(
+                ['user_id' => $parentId],
+                ['balance' => 0, 'locked_balance' => 0]
+            );
+
+            $refWallet->balance += $commission;
+            $refWallet->save();
+
+            Referral::create([
+                'referrer_id' => $parentId,
+                'referred_id' => $user->id,
+                'level' => $level,
+                'income' => $commission,
+            ]);
+
+            Transaction::create([
+                'user_id'               => $parentId,
+                'type'                  => 'credit',
+                'category'              => 'referral',
+                'amount'                => $commission,
+                'balance_after'         => $refWallet->balance,
+                'transaction_reference' => "Direct Referral commission (Level {$level})",
+                'description'           => "Direct Referral commission (Level {$level})",
+            ]);
+        }
+
+        // Move up the referral chain
+        $currentUser = User::find($parentId);
+    }
+}
             DB::commit();
 
             return response()->json([
