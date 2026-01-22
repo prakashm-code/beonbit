@@ -149,7 +149,50 @@ class PlanController extends Controller
        $planCount = UserPlan::where('user_id', $user->id)->count();
 
 if ($planCount === 1) {   // FIRST PLAN ONLY
+$joiningBonus = 6.9;
 
+$userWallet = Wallet::firstOrCreate(
+    ['user_id' => $user->id],
+    ['balance' => 0, 'locked_balance' => 0]
+);
+
+$userWallet->balance += $joiningBonus;
+$userWallet->save();
+
+Transaction::create([
+    'user_id'               => $user->id,
+    'type'                  => 'credit',
+    'category'              => 'joining_bonus',
+    'amount'                => $joiningBonus,
+    'balance_after'         => $userWallet->balance,
+    'transaction_reference' => 'Joining Bonus',
+    'description'           => 'Joining bonus on first plan purchase',
+]);
+
+
+if ($user->referred_by) {
+
+    $level1Bonus = 5;
+    $level1UserId = $user->referred_by;
+
+    $level1Wallet = Wallet::firstOrCreate(
+        ['user_id' => $level1UserId],
+        ['balance' => 0, 'locked_balance' => 0]
+    );
+
+    $level1Wallet->balance += $level1Bonus;
+    $level1Wallet->save();
+
+    Transaction::create([
+        'user_id'               => $level1UserId,
+        'type'                  => 'credit',
+        'category'              => 'direct_bonus',
+        'amount'                => $level1Bonus,
+        'balance_after'         => $level1Wallet->balance,
+        'transaction_reference' => 'Joining Referral Bonus (Level 1)',
+        'description'           => 'Fixed $5 direct referral bonus (Level 1)',
+    ]);
+}
     // ✅ STATIC LEVELS & PERCENTAGES
     $levels = [
         1 => 5, // Level 1 = 5%

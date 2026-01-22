@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use App\DataTables\UserPlanDataTable;
 use App\Models\Plan;
+use App\Models\ReferralSetting;
 use App\Models\Transaction;
 use App\Models\UserPlan;
 use App\Models\Wallet;
@@ -236,5 +237,65 @@ class UserController extends Controller
           return redirect()->route('admin.user')
                 ->with('msg_error', 'User plan not added successfully');
         }
+    }
+
+    public function getMyReferralTree(String $id){
+        $title = 'User Referral Tree';
+        $page = 'admin.user.referral_tree';
+        $js = ['user'];
+    $user_id = decrypt($id);
+    $get_username= User::findOrFail($user_id);
+            $levels = ReferralSetting::where('status', '1')
+                ->orderBy('from_level')
+                ->get();
+            $result = [];
+
+            if ($levels->isEmpty()) {
+                return $result;
+            }
+
+            $maxLevel = (int) $levels->max('to_level');
+
+            $visited = [];
+
+            $queue = [
+                ['user_id' => $user_id, 'level' => 0]
+            ];
+
+            $visited[$user_id] = true;
+            while (!empty($queue)) {
+                $current = array_shift($queue);
+                if ($current['level'] >= $maxLevel) {
+                    continue;
+                }
+                $children = User::where('referred_by', $current['user_id'])
+                    ->where('role', '0')
+                    ->select('id', 'first_name', 'last_name', 'email')
+                    ->get();
+                foreach ($children as $child) {
+                    if (isset($visited[$child->id])) {
+                        continue;
+                    }
+                    $visited[$child->id] = true;
+                    $level = $current['level'] + 1;
+                    $result["level_$level"][] = [
+                        'id'    => $child->id,
+                        'name'  => trim($child->first_name . ' ' . $child->last_name),
+                        'email' => $child->email,
+                    ];
+                    $queue[] = [
+                        'user_id' => $child->id,
+                        'level'   => $level
+                    ];
+                }
+            }
+            // dd($result);
+            return view("layouts.admin.layout", compact(
+            'title',
+            'page',
+            'js',
+            'result',
+            'get_username'
+        ));
     }
 }

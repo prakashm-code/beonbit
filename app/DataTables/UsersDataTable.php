@@ -68,12 +68,27 @@ class UsersDataTable extends DataTable
             ->addColumn('phone', function ($row) {
                 return $row->phone;
             })
+            ->addColumn('status', function ($row) {
+                $hasActivePlan = $row->userPlans->where('status', 'active')->count() > 0;
+
+                if ($hasActivePlan) {
+                    return '<span class="badge bg-success">Active</span>';
+                }
+
+                return '<span class="badge bg-secondary">Inactive</span>';
+            })
+            ->addColumn('total_active_plan', function ($row) {
+                return $row->userPlans->where('status', 'active')->count();
+            })
+            ->addColumn('total_complete_plan', function ($row) {
+                 return $row->userPlans->where('status', 'completed')->count();
+            })
             ->addColumn('country', function ($row) {
                 return $row->country;
             })
 
-              ->addColumn('add_plan', function ($row) {
-                    $cryptId = encrypt($row->id);
+            ->addColumn('add_plan', function ($row) {
+                $cryptId = encrypt($row->id);
                 $template_delete = decrypt($cryptId);
                 $add_plan_url = route('admin.add_user_plan', $cryptId);
                 // $edit_url = "";
@@ -81,7 +96,16 @@ class UsersDataTable extends DataTable
                 return '<div class="action-icon" style="gap: 20px;display: flex">
                             <a class="" href="' .  $add_plan_url . '" title="Edit"><i class="ti ti-edit"></i></a
                             </div>';
+            })
+            ->addColumn('referral_tree', function ($row) {
+                $cryptId = encrypt($row->id);
+                $template_delete = decrypt($cryptId);
+                $add_plan_url = route('admin.get_my_referral', $cryptId);
+                // $edit_url = "";
 
+                return '<div class="action-icon" style="gap: 20px;display: flex">
+                            <a class="" href="' .  $add_plan_url . '" title="tree"><i class="ti ti-eye"></i></a
+                            </div>';
             })
             ->addColumn('actions', function ($row) {
                 $cryptId = encrypt($row->id);
@@ -104,7 +128,7 @@ class UsersDataTable extends DataTable
                             </div>';
             })
 
-            ->rawColumns(['checkbox', 'name', 'email', 'phone', 'country','add_plan', 'actions']);
+            ->rawColumns(['checkbox', 'name', 'email', 'phone', 'status', 'total_active_plan', 'total_complete_plan', 'country', 'add_plan','referral_tree', 'actions']);
     }
 
     /**
@@ -132,7 +156,7 @@ class UsersDataTable extends DataTable
             $direction = 'asc';
         }
 
-        return User::query()->where('role', '0')->orderBy($column, $direction);
+        return User::query()->with('userPlans')->where('role', '0')->orderBy($column, $direction);
     }
 
     /**
@@ -170,8 +194,12 @@ class UsersDataTable extends DataTable
             Column::make('name')->title('Name')->orderable(true),
             Column::make('email')->title('Email')->orderable(true),
             Column::make('phone')->title('Phone no')->orderable(true),
+            Column::make('status')->title('Status')->orderable(false),
+            Column::make('total_active_plan')->title('Active Plans')->orderable(false),
+            Column::make('total_complete_plan')->title('Completed Plans')->orderable(false),
             Column::make('country')->title('Country')->orderable(true),
             Column::make('add_plan')->title('Add Plan')->orderable(true),
+            Column::make('referral_tree')->title('Referral Tree')->orderable(true),
             Column::make('actions')->title('Actions')->orderable(false),
         ];
     }

@@ -34,6 +34,7 @@ Route::middleware(AdminAuth::class, NoCache::class)->group(function () {
     Route::get('admin/user_plans', [UserController::class, 'UserPlans'])->name('admin.user_plan');
     Route::get('admin/add_user_plans/{id}', [UserController::class, 'AddUserPlan'])->name('admin.add_user_plan');
     Route::post('admin/user_plan_store', [UserController::class, 'StoreUserPlan'])->name('admin.user_plan_store');
+    Route::get('admin/get_my_referral/{id}', [UserController::class, 'getMyReferralTree'])->name('admin.get_my_referral');
 
     Route::get('admin/term_conditions', [TermConditionController::class, 'index'])->name('admin.term_conditions');
     Route::post('admin/term_conditions_store', [TermConditionController::class, 'store'])->name('admin.term_conditions_store');
