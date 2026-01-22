@@ -245,3 +245,50 @@ $("#delete-selected").on("click", function () {
         }
     });
 });
+
+$("#change_pwd_form").validate({
+    // onkeyup: false,
+    onfocusout: function (element) {
+        $(element).valid();
+    },
+    rules: {
+
+        password: {
+            required: true,
+        },
+        c_password: {
+            required: true,
+            equalTo: "#password"
+        }
+    },
+    messages: {
+
+        password: {
+            required: "Please enter a password",
+        },
+        c_password: {
+            required: "Please confirm password",
+            equalTo: "Password and confirm password must match"
+        }
+    },
+    normalizer: function (value) {
+        return $.trim(value);
+    },
+
+    errorClass: "text-danger",
+    errorElement: "span",
+    highlight: function (element) {
+        $(element).addClass("is-invalid");
+    },
+    unhighlight: function (element) {
+        $(element).removeClass("is-invalid");
+    },
+    submitHandler: function (form) {
+        $(form)
+            .find('button[type="submit"]')
+            .prop("disabled", true)
+            .text("Please wait...");
+
+        form.submit();
+    },
+});

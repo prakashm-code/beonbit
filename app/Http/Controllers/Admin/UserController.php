@@ -149,7 +149,7 @@ class UserController extends Controller
         }
     }
 
-     public function UserPlans(UserPlanDataTable $DataTable)
+    public function UserPlans(UserPlanDataTable $DataTable)
     {
         $title = 'Plans';
         $page = 'admin.user.user_plan_list';
@@ -157,14 +157,14 @@ class UserController extends Controller
         return $DataTable->render('layouts.admin.layout', compact('title', 'page', 'js'));
     }
 
-     public function AddUserPlan(string $id)
+    public function AddUserPlan(string $id)
     {
         $title = 'Add Plans';
         $page = 'admin.user.add_plan';
         $js = ['user'];
-        $getplans = Plan::where('status','1')->get();
-        $user_id= decrypt($id);
-        $user_email= User::where('id',$user_id)->select('email')->first();
+        $getplans = Plan::where('status', '1')->get();
+        $user_id = decrypt($id);
+        $user_email = User::where('id', $user_id)->select('email')->first();
         return view("layouts.admin.layout", compact(
             'title',
             'page',
@@ -174,15 +174,15 @@ class UserController extends Controller
             'getplans'
         ));
     }
-     public function StoreUserPlan(Request $request)
+    public function StoreUserPlan(Request $request)
     {
-         $request->validate([
+        $request->validate([
             'plan_id' => 'required|exists:plans,id',
             'amount'  => 'required|numeric|min:1'
         ]);
 
         DB::beginTransaction();
-        $user_id=$request->user_id;
+        $user_id = $request->user_id;
         try {
             $plan = Plan::where('id', $request->plan_id)
                 ->where('status', 1)
@@ -230,72 +230,107 @@ class UserController extends Controller
 
             DB::commit();
 
-           return redirect()->route('admin.user')
+            return redirect()->route('admin.user')
                 ->with('msg_success', 'User plan added successfully');
         } catch (\Exception $e) {
             DB::rollBack();
-          return redirect()->route('admin.user')
+            return redirect()->route('admin.user')
                 ->with('msg_error', 'User plan not added successfully');
         }
     }
 
-    public function getMyReferralTree(String $id){
+    public function getMyReferralTree(String $id)
+    {
         $title = 'User Referral Tree';
         $page = 'admin.user.referral_tree';
         $js = ['user'];
-    $user_id = decrypt($id);
-    $get_username= User::findOrFail($user_id);
-            $levels = ReferralSetting::where('status', '1')
-                ->orderBy('from_level')
-                ->get();
-            $result = [];
+        $user_id = decrypt($id);
+        $get_username = User::findOrFail($user_id);
+        $levels = ReferralSetting::where('status', '1')
+            ->orderBy('from_level')
+            ->get();
+        $result = [];
 
-            if ($levels->isEmpty()) {
-                return $result;
+        if ($levels->isEmpty()) {
+            return $result;
+        }
+
+        $maxLevel = (int) $levels->max('to_level');
+
+        $visited = [];
+
+        $queue = [
+            ['user_id' => $user_id, 'level' => 0]
+        ];
+
+        $visited[$user_id] = true;
+        while (!empty($queue)) {
+            $current = array_shift($queue);
+            if ($current['level'] >= $maxLevel) {
+                continue;
             }
-
-            $maxLevel = (int) $levels->max('to_level');
-
-            $visited = [];
-
-            $queue = [
-                ['user_id' => $user_id, 'level' => 0]
-            ];
-
-            $visited[$user_id] = true;
-            while (!empty($queue)) {
-                $current = array_shift($queue);
-                if ($current['level'] >= $maxLevel) {
+            $children = User::where('referred_by', $current['user_id'])
+                ->where('role', '0')
+                ->select('id', 'first_name', 'last_name', 'email')
+                ->get();
+            foreach ($children as $child) {
+                if (isset($visited[$child->id])) {
                     continue;
                 }
-                $children = User::where('referred_by', $current['user_id'])
-                    ->where('role', '0')
-                    ->select('id', 'first_name', 'last_name', 'email')
-                    ->get();
-                foreach ($children as $child) {
-                    if (isset($visited[$child->id])) {
-                        continue;
-                    }
-                    $visited[$child->id] = true;
-                    $level = $current['level'] + 1;
-                    $result["level_$level"][] = [
-                        'id'    => $child->id,
-                        'name'  => trim($child->first_name . ' ' . $child->last_name),
-                        'email' => $child->email,
-                    ];
-                    $queue[] = [
-                        'user_id' => $child->id,
-                        'level'   => $level
-                    ];
-                }
+                $visited[$child->id] = true;
+                $level = $current['level'] + 1;
+                $result["level_$level"][] = [
+                    'id'    => $child->id,
+                    'name'  => trim($child->first_name . ' ' . $child->last_name),
+                    'email' => $child->email,
+                ];
+                $queue[] = [
+                    'user_id' => $child->id,
+                    'level'   => $level
+                ];
             }
-            // dd($result);
-            return view("layouts.admin.layout", compact(
+        }
+        // dd($result);
+        return view("layouts.admin.layout", compact(
             'title',
             'page',
             'js',
             'result',
             'get_username'
         ));
+    }
+
+    public function ChangeAdminPass(Request $request)
+    {
+        $title = 'Update Change Password';
+        $page = 'admin.change_password';
+        $js = ['user'];
+        return view("layouts.admin.layout", compact(
+            'title',
+            'page',
+            'js',
+
+        ));
+    }
+
+    public function ChangeAdminStore(Request $request)
+    {
+        // dd($request);
+        try {
+            DB::beginTransaction();
+
+            $validated = $request->validate([
+                'password'          => 'required',
+            ]);
+            $updatepwd = User::where('role', '1')->first();
+            $updatepwd->password = Hash::make($validated['password']);;
+            $updatepwd->save();
+
+            DB::commit();
+            return redirect()->route('admin.dashboard')->with('msg_success', 'Password updated successfully !');
+        } catch (QueryException $e) {
+            DB::rollBack();
+            return redirect()->back()->with('msg_error', 'Password not updated successfully !' . $e->getMessage());
+        }
     }
 }

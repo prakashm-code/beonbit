@@ -48,6 +48,10 @@
                                 <i class="ti ti-logout fs-6"></i>
                                 <p class="mb-0 fs-3">Logout</p>
                             </a>
+                              <a href="{{ route('admin.change_admin_pass') }} " class="d-flex align-items-center gap-2 dropdown-item">
+                                <i class="ti ti-settings fs-6"></i>
+                                <p class="mb-0 fs-3">Change Password</p>
+                            </a>
                             {{-- <a href="{{ route('admin.logout') }}"
                                 class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a> --}}
                         </div>

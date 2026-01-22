@@ -12,7 +12,7 @@
             <ul id="sidebarnav">
 
                 <li class="sidebar-item">
-                    <a class="sidebar-link {{ Request::segment(2) == 'dashboard' ? 'active' : '' }}"
+                    <a class="sidebar-link {{  in_array(Request::segment(2), ['dashboard','change_password']) ? 'active' : '' }}"
                         href="{{ route('admin.dashboard') }}" aria-expanded="false">
                         <i class="ti ti-atom"></i>
                         <span class="hide-menu">Dashboard</span>
