@@ -85,6 +85,7 @@ function distributeReferralCommission(
                         'user_id'               => $parentId,
                         'type'                  => 'credit',
                         'category'              => 'referral',
+                        'isEarning'              => '1',
                         'amount'                => $commission,
                         'balance_after'         => $wallet->balance,
                         'transaction_reference' => 'Referral commission (Level ' . $level . ')',

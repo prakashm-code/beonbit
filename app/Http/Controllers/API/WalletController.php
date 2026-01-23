@@ -111,8 +111,12 @@ class WalletController extends Controller
         $page   = $request->page ?? 1;
         $search = $request->search ?? "";
         $sort   = $request->sort ?? 'desc';
-
+        $isEarning = $request->input('isEarning')??"";
+    // dd($isEarning);
         $transactions = $user->transactions()
+            ->when($isEarning !== null && $isEarning !== '', function ($q) use ($isEarning) {
+                $q->where('isEarning', $isEarning);
+            })
             ->when($search !== '', function ($q) use ($search) {
                 $q->where(function ($query) use ($search) {
                     $query->where('type', 'LIKE', "%{$search}%")

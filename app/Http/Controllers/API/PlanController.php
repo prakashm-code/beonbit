@@ -138,7 +138,7 @@ class PlanController extends Controller
                 'user_id' => $user->id,
                 'type' => 'debit',
                 'category' => 'plan_purchase',
-                'isEarning'=>'0',
+                'isEarning' => '0',
                 'amount' => $request->amount,
                 'balance_after' => $wallet->balance, // unchanged by design
                 'transaction_reference' => 'plan_purchase',
@@ -164,8 +164,7 @@ class PlanController extends Controller
                     'user_id'               => $user->id,
                     'type'                  => 'credit',
                     'category'              => 'joining_bonus',
-                                    'isEarning'=>'0',
-
+                    'isEarning' => '0',
                     'amount'                => $joiningBonus,
                     'balance_after'         => $userWallet->balance,
                     'transaction_reference' => 'Joining Bonus',
@@ -189,9 +188,8 @@ class PlanController extends Controller
                     Transaction::create([
                         'user_id'               => $level1UserId,
                         'type'                  => 'credit',
-                        'category'              => 'joining_bonus',
-                                        'isEarning'=>'1',
-
+                        'category'              => 'direct_bonus',
+                        'isEarning' => '1',
                         'amount'                => $level1Bonus,
                         'balance_after'         => $level1Wallet->balance,
                         'transaction_reference' => 'Joining Referral Bonus (Level 1)',
@@ -238,8 +236,7 @@ class PlanController extends Controller
                             'user_id'               => $parentId,
                             'type'                  => 'credit',
                             'category'              => 'referral',
-                                            'isEarning'=>'0',
-
+                            'isEarning' => '1',
                             'amount'                => $commission,
                             'balance_after'         => $refWallet->balance,
                             'transaction_reference' => "Direct Referral commission (Level {$level})",
