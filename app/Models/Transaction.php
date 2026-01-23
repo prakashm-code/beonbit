@@ -11,6 +11,7 @@ class Transaction extends Model
         'user_id',
         'type',
         'category',
+        'isEarning',
         'amount',
         'commission',
         'balance_after',

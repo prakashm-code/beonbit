@@ -138,6 +138,7 @@ class PlanController extends Controller
                 'user_id' => $user->id,
                 'type' => 'debit',
                 'category' => 'plan_purchase',
+                'isEarning'=>'0',
                 'amount' => $request->amount,
                 'balance_after' => $wallet->balance, // unchanged by design
                 'transaction_reference' => 'plan_purchase',
@@ -146,104 +147,110 @@ class PlanController extends Controller
 
 
 
-       $planCount = UserPlan::where('user_id', $user->id)->count();
+            $planCount = UserPlan::where('user_id', $user->id)->count();
 
-if ($planCount === 1) {   // FIRST PLAN ONLY
-$joiningBonus = 6.9;
+            if ($planCount === 1) {   // FIRST PLAN ONLY
+                $joiningBonus = 6.9;
 
-$userWallet = Wallet::firstOrCreate(
-    ['user_id' => $user->id],
-    ['balance' => 0, 'locked_balance' => 0]
-);
+                $userWallet = Wallet::firstOrCreate(
+                    ['user_id' => $user->id],
+                    ['balance' => 0, 'locked_balance' => 0]
+                );
 
-$userWallet->balance += $joiningBonus;
-$userWallet->save();
+                $userWallet->balance += $joiningBonus;
+                $userWallet->save();
 
-Transaction::create([
-    'user_id'               => $user->id,
-    'type'                  => 'credit',
-    'category'              => 'joining_bonus',
-    'amount'                => $joiningBonus,
-    'balance_after'         => $userWallet->balance,
-    'transaction_reference' => 'Joining Bonus',
-    'description'           => 'Joining bonus on first plan purchase',
-]);
+                Transaction::create([
+                    'user_id'               => $user->id,
+                    'type'                  => 'credit',
+                    'category'              => 'joining_bonus',
+                                    'isEarning'=>'0',
+
+                    'amount'                => $joiningBonus,
+                    'balance_after'         => $userWallet->balance,
+                    'transaction_reference' => 'Joining Bonus',
+                    'description'           => 'Joining bonus on first plan purchase',
+                ]);
 
 
-if ($user->referred_by) {
+                if ($user->referred_by) {
 
-    $level1Bonus = 5;
-    $level1UserId = $user->referred_by;
+                    $level1Bonus = 5;
+                    $level1UserId = $user->referred_by;
 
-    $level1Wallet = Wallet::firstOrCreate(
-        ['user_id' => $level1UserId],
-        ['balance' => 0, 'locked_balance' => 0]
-    );
+                    $level1Wallet = Wallet::firstOrCreate(
+                        ['user_id' => $level1UserId],
+                        ['balance' => 0, 'locked_balance' => 0]
+                    );
 
-    $level1Wallet->balance += $level1Bonus;
-    $level1Wallet->save();
+                    $level1Wallet->balance += $level1Bonus;
+                    $level1Wallet->save();
 
-    Transaction::create([
-        'user_id'               => $level1UserId,
-        'type'                  => 'credit',
-        'category'              => 'direct_bonus',
-        'amount'                => $level1Bonus,
-        'balance_after'         => $level1Wallet->balance,
-        'transaction_reference' => 'Joining Referral Bonus (Level 1)',
-        'description'           => 'Fixed $5 direct referral bonus (Level 1)',
-    ]);
-}
-    // ✅ STATIC LEVELS & PERCENTAGES
-    $levels = [
-        1 => 5, // Level 1 = 5%
-        2 => 3, // Level 2 = 3%
-        3 => 1, // Level 3 = 1%
-    ];
+                    Transaction::create([
+                        'user_id'               => $level1UserId,
+                        'type'                  => 'credit',
+                        'category'              => 'joining_bonus',
+                                        'isEarning'=>'1',
 
-    $currentUser = $user;
+                        'amount'                => $level1Bonus,
+                        'balance_after'         => $level1Wallet->balance,
+                        'transaction_reference' => 'Joining Referral Bonus (Level 1)',
+                        'description'           => 'Fixed $5 direct referral bonus (Level 1)',
+                    ]);
+                }
+                // ✅ STATIC LEVELS & PERCENTAGES
+                $levels = [
+                    1 => 5, // Level 1 = 5%
+                    2 => 3, // Level 2 = 3%
+                    3 => 1, // Level 3 = 1%
+                ];
 
-    foreach ($levels as $level => $percent) {
+                $currentUser = $user;
 
-        if (!$currentUser->referred_by) {
-            break;
-        }
+                foreach ($levels as $level => $percent) {
 
-        $parentId = $currentUser->referred_by;
+                    if (!$currentUser->referred_by) {
+                        break;
+                    }
 
-        $commission = round(($request->amount * $percent) / 100, 2);
+                    $parentId = $currentUser->referred_by;
 
-        if ($commission > 0) {
+                    $commission = round(($request->amount * $percent) / 100, 2);
 
-            $refWallet = Wallet::firstOrCreate(
-                ['user_id' => $parentId],
-                ['balance' => 0, 'locked_balance' => 0]
-            );
+                    if ($commission > 0) {
 
-            $refWallet->balance += $commission;
-            $refWallet->save();
+                        $refWallet = Wallet::firstOrCreate(
+                            ['user_id' => $parentId],
+                            ['balance' => 0, 'locked_balance' => 0]
+                        );
 
-            Referral::create([
-                'referrer_id' => $parentId,
-                'referred_id' => $user->id,
-                'level' => $level,
-                'income' => $commission,
-            ]);
+                        $refWallet->balance += $commission;
+                        $refWallet->save();
 
-            Transaction::create([
-                'user_id'               => $parentId,
-                'type'                  => 'credit',
-                'category'              => 'referral',
-                'amount'                => $commission,
-                'balance_after'         => $refWallet->balance,
-                'transaction_reference' => "Direct Referral commission (Level {$level})",
-                'description'           => "Direct Referral commission (Level {$level})",
-            ]);
-        }
+                        Referral::create([
+                            'referrer_id' => $parentId,
+                            'referred_id' => $user->id,
+                            'level' => $level,
+                            'income' => $commission,
+                        ]);
 
-        // Move up the referral chain
-        $currentUser = User::find($parentId);
-    }
-}
+                        Transaction::create([
+                            'user_id'               => $parentId,
+                            'type'                  => 'credit',
+                            'category'              => 'referral',
+                                            'isEarning'=>'0',
+
+                            'amount'                => $commission,
+                            'balance_after'         => $refWallet->balance,
+                            'transaction_reference' => "Direct Referral commission (Level {$level})",
+                            'description'           => "Direct Referral commission (Level {$level})",
+                        ]);
+                    }
+
+                    // Move up the referral chain
+                    $currentUser = User::find($parentId);
+                }
+            }
             DB::commit();
 
             return response()->json([
