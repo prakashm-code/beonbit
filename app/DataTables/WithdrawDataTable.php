@@ -77,7 +77,8 @@ class WithdrawDataTable extends DataTable
 
                 $html .= '</select>';
 
-                return 'Success';
+                // return 'Success';
+                return $html;
             })
 
             ->addColumn('method', function ($row) {

@@ -31,14 +31,14 @@ class WithdrawalController extends Controller
             $user = Auth::guard('api')->user();
 
             // 1️⃣ Minimum withdrawal check
-            // if ($request->amount < 10) {
-            //     DB::rollBack();
+            if ($request->amount < 10) {
+                DB::rollBack();
 
-            //     return response()->json([
-            //         'status' => 1,
-            //         'message' => 'Minimum withdrawal amount is $10'
-            //     ], 200);
-            // }
+                return response()->json([
+                    'status' => 1,
+                    'message' => 'Minimum withdrawal amount is $10'
+                ], 200);
+            }
 
             $commissionPercentage = 10; // 10%
             $commissionAmount = round(($request->amount * $commissionPercentage) / 100, 2);
@@ -67,21 +67,7 @@ class WithdrawalController extends Controller
                 'amount' => 'required|numeric'
             ]);
 
-            // 2. Send the request to the Crypto API provider
-            // This is a standard PHP call - no special extensions needed!
-            // $response = Http::withHeaders([
-            //     'x-api-key' => 't-696938cfdd33363e691efe43-0eaf15ad2eb145c6b0251723'
-            // ])->post('https://api.tatum.io/v3/ethereum/transaction', [
-            //     'to' => $request->address,
-            //     // 'contractAddress' => '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT ERC20
-            //     'digits' => 6,
-            //     'currency' => 'USDT',
-            //     'contractAddress' => '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-            //     'amount' => (string)$request->amount,
-            //     'fromPrivateKey' => '2d1cd96b5afa12a6ffd07d9275796a781430b5e02419f67da4439b3f473bd1a8'
-            // ]);
 
-            // if ($response->successful()) {
                 $wallet->balance -= $request->amount;
                 $wallet->locked_balance += $request->amount;
                 $wallet->save();
@@ -113,7 +99,6 @@ class WithdrawalController extends Controller
                 return response()->json([
                     'status' => 0,
                     'message' => 'Withdrawal successful',
-                    // 'txId' => $response->json()['txId'],
                     'data' => [
                         'withdrawal_id'     => $withdrawal->id,
                         'requested_amount' => $request->amount,
@@ -122,8 +107,7 @@ class WithdrawalController extends Controller
                         'status'            => $withdrawal->status
                     ]
                 ], 200);
-            // }
-// =            return response()->json(['error' => 'Withdrawal failed'], 500);
+
         } catch (\Exception $e) {
             DB::rollBack();
 
