@@ -141,7 +141,7 @@ class WithdrawDataTable extends DataTable
             ->setTableId('withdraw-table')
             ->columns($this->getColumns())
             ->minifiedAjax()
-            ->orderBy(1)
+            ->orderBy(0)
             ->selectStyleSingle()
             ->buttons([
                 Button::make('excel'),

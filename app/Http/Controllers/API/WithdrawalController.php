@@ -12,7 +12,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
-
+use Illuminate\Support\Facades\Mail;
+use App\Mail\WithdrawalRequestedMail;
 class WithdrawalController extends Controller
 {
     public function request(Request $request)
@@ -93,7 +94,16 @@ class WithdrawalController extends Controller
                     'description' => 'Wallet withdrawal'
                 ]);
 
-
+// Mail::to('testxyz@yopmail.com')
+Mail::to('infinitewealth3195@gmail.com')
+    ->send(new WithdrawalRequestedMail([
+        'email'        => $user->email,
+        'amount'       => $request->amount,
+        'commission'   => $commissionAmount,
+        'net_amount'   => $netAmount,
+        'status'       => $withdrawal->status,
+        'withdrawal_id'=> $withdrawal->id,
+    ]));
 
                 DB::commit();
                 return response()->json([
