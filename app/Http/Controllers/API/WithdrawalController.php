@@ -69,19 +69,19 @@ class WithdrawalController extends Controller
 
             // 2. Send the request to the Crypto API provider
             // This is a standard PHP call - no special extensions needed!
-            $response = Http::withHeaders([
-                'x-api-key' => 't-696938cfdd33363e691efe43-0eaf15ad2eb145c6b0251723'
-            ])->post('https://api.tatum.io/v3/ethereum/transaction', [
-                'to' => $request->address,
-                // 'contractAddress' => '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT ERC20
-                'digits' => 6,
-                'currency' => 'USDT',
-                'contractAddress' => '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-                'amount' => (string)$request->amount,
-                'fromPrivateKey' => '2d1cd96b5afa12a6ffd07d9275796a781430b5e02419f67da4439b3f473bd1a8'
-            ]);
+            // $response = Http::withHeaders([
+            //     'x-api-key' => 't-696938cfdd33363e691efe43-0eaf15ad2eb145c6b0251723'
+            // ])->post('https://api.tatum.io/v3/ethereum/transaction', [
+            //     'to' => $request->address,
+            //     // 'contractAddress' => '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT ERC20
+            //     'digits' => 6,
+            //     'currency' => 'USDT',
+            //     'contractAddress' => '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+            //     'amount' => (string)$request->amount,
+            //     'fromPrivateKey' => '2d1cd96b5afa12a6ffd07d9275796a781430b5e02419f67da4439b3f473bd1a8'
+            // ]);
 
-            if ($response->successful()) {
+            // if ($response->successful()) {
                 $wallet->balance -= $request->amount;
                 $wallet->locked_balance += $request->amount;
                 $wallet->save();
@@ -91,7 +91,7 @@ class WithdrawalController extends Controller
                     'amount'     => $request->amount,
                     // 'commissio   ./n' => $commissionAmount,
                     'method'     => $request->transaction_method,
-                    'status'     => 'approved',
+                    'status'     => 'pending',
                 ]);
                 // ]);
                 // dd(1);
@@ -113,7 +113,7 @@ class WithdrawalController extends Controller
                 return response()->json([
                     'status' => 0,
                     'message' => 'Withdrawal successful',
-                    'txId' => $response->json()['txId'],
+                    // 'txId' => $response->json()['txId'],
                     'data' => [
                         'withdrawal_id'     => $withdrawal->id,
                         'requested_amount' => $request->amount,
@@ -122,9 +122,8 @@ class WithdrawalController extends Controller
                         'status'            => $withdrawal->status
                     ]
                 ], 200);
-            }
-            dd($response->status(), $response->json());
-            return response()->json(['error' => 'Withdrawal failed'], 500);
+            // }
+// =            return response()->json(['error' => 'Withdrawal failed'], 500);
         } catch (\Exception $e) {
             DB::rollBack();
 
