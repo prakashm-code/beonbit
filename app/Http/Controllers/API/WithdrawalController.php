@@ -75,7 +75,7 @@ class WithdrawalController extends Controller
                 'to' => $request->address,
                 'contractAddress' => '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT ERC20
                 'digits' => 6,
-                // 'currency' => 'USDT',
+                'currency' => 'USDT',
                 'amount' => (string)$request->amount,
                 'fromPrivateKey' => '2d1cd96b5afa12a6ffd07d9275796a781430b5e02419f67da4439b3f473bd1a8'
             ]);
