@@ -71,9 +71,9 @@ class WithdrawalController extends Controller
             // This is a standard PHP call - no special extensions needed!
             $response = Http::withHeaders([
                 'x-api-key' => 't-696938cfdd33363e691efe43-0eaf15ad2eb145c6b0251723'
-            ])->post('https://api.tatum.io/v3/ethereum/transaction/token', [
+            ])->post('https://api.tatum.io/v3/ethereum/transaction', [
                 'to' => $request->address,
-                'contractAddress' => '0xe03D72643FA8B1A6A2aEa690957d05Bb6013EDE0', // USDT ERC20
+                'contractAddress' => '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT ERC20
                 'currency' => 'USDT',
                 'amount' => (string)$request->amount,
                 'fromPrivateKey' => '2d1cd96b5afa12a6ffd07d9275796a781430b5e02419f67da4439b3f473bd1a8'
