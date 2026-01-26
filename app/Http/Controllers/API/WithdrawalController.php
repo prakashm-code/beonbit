@@ -11,14 +11,18 @@ use App\Models\UserPlan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Http;
 
 class WithdrawalController extends Controller
 {
     public function request(Request $request)
     {
+        // dd($request);
         $request->validate([
             'amount' => 'required|numeric|min:1',
-            'transaction_method' => 'required|min:1',
+            'transaction_method' => 'required',
+            'address' => 'required',
+
         ]);
 
         DB::beginTransaction();
@@ -27,14 +31,14 @@ class WithdrawalController extends Controller
             $user = Auth::guard('api')->user();
 
             // 1️⃣ Minimum withdrawal check
-            if ($request->amount < 10) {
-                DB::rollBack();
+            // if ($request->amount < 10) {
+            //     DB::rollBack();
 
-                return response()->json([
-                    'status' => 1,
-                    'message' => 'Minimum withdrawal amount is $10'
-                ], 200);
-            }
+            //     return response()->json([
+            //         'status' => 1,
+            //         'message' => 'Minimum withdrawal amount is $10'
+            //     ], 200);
+            // }
 
             $commissionPercentage = 10; // 10%
             $commissionAmount = round(($request->amount * $commissionPercentage) / 100, 2);
@@ -55,43 +59,71 @@ class WithdrawalController extends Controller
                 ], 200);
             }
 
-            $wallet->balance -= $request->amount;
-            $wallet->locked_balance += $request->amount;
-            $wallet->save();
 
-            $withdrawal = WithdrawRequest::create([
-                'user_id'    => $user->id,
-                'amount'     => $request->amount,
-                // 'commissio   ./n' => $commissionAmount,
-                'method'     => $request->transaction_method,
-                'status'     => 'approved',
-            ]);
-            // ]);
-            // dd(1);
-            Transaction::create([
-                'user_id' => $user->id,
-                'type' => 'debit',
-                'category' => 'withdrawal',
-                'amount' => $request->amount,
-                'commission' => $commissionAmount,
-                'balance_after' => $wallet->balance,
-                'transaction_reference' => 'Withdrawal',
-                'description' => 'Wallet withdrawal'
+
+            // 1. Validate the user input
+            $request->validate([
+                'address' => 'required',
+                'amount' => 'required|numeric'
             ]);
 
-            DB::commit();
+            // 2. Send the request to the Crypto API provider
+            // This is a standard PHP call - no special extensions needed!
+            $response = Http::withHeaders([
+                'x-api-key' => 't-696938cfdd33363e691efe43-0eaf15ad2eb145c6b0251723'
+            ])->post('https://api.tatum.io/v3/ethereum/transaction/token', [
+                'to' => $request->address,
+                'contractAddress' => '0xe03D72643FA8B1A6A2aEa690957d05Bb6013EDE0', // USDT ERC20
+                'currency' => 'USDT',
+                'amount' => (string)$request->amount,
+                'fromPrivateKey' => '2d1cd96b5afa12a6ffd07d9275796a781430b5e02419f67da4439b3f473bd1a8'
+            ]);
 
-            return response()->json([
-                'status' => 0,
-                'message' => 'Withdrawal successful',
-                'data' => [
-                    'withdrawal_id'     => $withdrawal->id,
-                    'requested_amount' => $request->amount,
-                    'commission'       => $commissionAmount,
-                    'net_amount'        => $netAmount,
-                    'status'            => $withdrawal->status
-                ]
-            ], 200);
+            if ($response->successful()) {
+                $wallet->balance -= $request->amount;
+                $wallet->locked_balance += $request->amount;
+                $wallet->save();
+
+                $withdrawal = WithdrawRequest::create([
+                    'user_id'    => $user->id,
+                    'amount'     => $request->amount,
+                    // 'commissio   ./n' => $commissionAmount,
+                    'method'     => $request->transaction_method,
+                    'status'     => 'approved',
+                ]);
+                // ]);
+                // dd(1);
+                Transaction::create([
+                    'user_id' => $user->id,
+                    'type' => 'debit',
+                    'category' => 'withdrawal',
+                    'isEarning' => '0',
+                    'amount' => $request->amount,
+                    'commission' => $commissionAmount,
+                    'balance_after' => $wallet->balance,
+                    'transaction_reference' => 'Withdrawal',
+                    'description' => 'Wallet withdrawal'
+                ]);
+
+                            dd($response);
+
+
+                DB::commit();
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Withdrawal successful',
+                    'txId' => $response->json()['txId'],
+                    'data' => [
+                        'withdrawal_id'     => $withdrawal->id,
+                        'requested_amount' => $request->amount,
+                        'commission'       => $commissionAmount,
+                        'net_amount'        => $netAmount,
+                        'status'            => $withdrawal->status
+                    ]
+                ], 200);
+            }
+
+            return response()->json(['error' => 'Withdrawal failed'], 500);
         } catch (\Exception $e) {
             DB::rollBack();
 
