@@ -105,7 +105,6 @@ class WithdrawalController extends Controller
                     'description' => 'Wallet withdrawal'
                 ]);
 
-                            dd($response);
 
 
                 DB::commit();
@@ -122,6 +121,7 @@ class WithdrawalController extends Controller
                     ]
                 ], 200);
             }
+                            dd($response);
 
             return response()->json(['error' => 'Withdrawal failed'], 500);
         } catch (\Exception $e) {
