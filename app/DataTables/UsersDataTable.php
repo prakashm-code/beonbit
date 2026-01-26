@@ -83,6 +83,9 @@ class UsersDataTable extends DataTable
             ->addColumn('total_complete_plan', function ($row) {
                  return $row->userPlans->where('status', 'completed')->count();
             })
+             ->addColumn('total_investment', function ($row) {
+                return '$'.$row->wallet->locked_balance??0;
+            })
             ->addColumn('country', function ($row) {
                 return $row->country;
             })
@@ -128,7 +131,7 @@ class UsersDataTable extends DataTable
                             </div>';
             })
 
-            ->rawColumns(['checkbox', 'name', 'email', 'phone', 'status', 'total_active_plan', 'total_complete_plan', 'country', 'add_plan','referral_tree', 'actions']);
+            ->rawColumns(['checkbox', 'name', 'email', 'phone', 'status', 'total_active_plan', 'total_complete_plan','total_investment', 'country', 'add_plan','referral_tree', 'actions']);
     }
 
     /**
@@ -156,7 +159,7 @@ class UsersDataTable extends DataTable
             $direction = 'asc';
         }
 
-        return User::query()->with('userPlans')->where('role', '0')->orderBy($column, $direction);
+        return User::query()->with('userPlans','wallet')->where('role', '0')->orderBy($column, $direction);
     }
 
     /**
@@ -197,6 +200,7 @@ class UsersDataTable extends DataTable
             Column::make('status')->title('Status')->orderable(false),
             Column::make('total_active_plan')->title('Active Plans')->orderable(false),
             Column::make('total_complete_plan')->title('Completed Plans')->orderable(false),
+            Column::make('total_investment')->title('Total Investment')->orderable(false),
             Column::make('country')->title('Country')->orderable(true),
             Column::make('add_plan')->title('Add Plan')->orderable(true),
             Column::make('referral_tree')->title('Referral Tree')->orderable(true),
