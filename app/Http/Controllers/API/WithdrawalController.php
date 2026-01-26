@@ -73,10 +73,9 @@ class WithdrawalController extends Controller
                 'x-api-key' => 't-696938cfdd33363e691efe43-0eaf15ad2eb145c6b0251723'
             ])->post('https://api.tatum.io/v3/ethereum/transaction', [
                 'to' => $request->address,
-                'contractAddress' => '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT ERC20
+                // 'contractAddress' => '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT ERC20
                 'digits' => 6,
-                'currency' => 'USDT',
-                'amount' => (string)$request->amount,
+                'currency' => 'ETH', // 👈 ETH only                'amount' => (string)$request->amount,
                 'fromPrivateKey' => '2d1cd96b5afa12a6ffd07d9275796a781430b5e02419f67da4439b3f473bd1a8'
             ]);
 
@@ -122,7 +121,7 @@ class WithdrawalController extends Controller
                     ]
                 ], 200);
             }
-dd($response->status(), $response->json());
+            dd($response->status(), $response->json());
             return response()->json(['error' => 'Withdrawal failed'], 500);
         } catch (\Exception $e) {
             DB::rollBack();
