@@ -21,12 +21,12 @@ class WithdrawalController extends Controller
     public function request(Request $request)
     {
         // dd($request);
-        $request->validate([
-            'amount' => 'required|numeric|min:1',
-            'transaction_method' => 'required',
-            'address' => 'required',
+        // $request->validate([
+        //     'amount' => 'required|numeric|min:1',
+        //     'transaction_method' => 'required',
+        //     'address' => 'required',
 
-        ]);
+        // ]);
 
         DB::beginTransaction();
 
@@ -38,8 +38,9 @@ class WithdrawalController extends Controller
             //     'amount' => 'required|numeric'
             // ]);
             $validator = Validator::make($request->all(), [
+                'amount' => 'required|numeric|min:1',
+                'transaction_method' => 'required',
                 'address' => 'required',
-                'amount' => 'required|numeric'
             ]);
 
 
