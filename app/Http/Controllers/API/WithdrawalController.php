@@ -20,23 +20,14 @@ class WithdrawalController extends Controller
 {
     public function request(Request $request)
     {
-        // dd($request);
-        // $request->validate([
-        //     'amount' => 'required|numeric|min:1',
-        //     'transaction_method' => 'required',
-        //     'address' => 'required',
 
-        // ]);
 
         DB::beginTransaction();
 
         try {
             $user = Auth::guard('api')->user();
 
-            // $request->validate([
-            //     'address' => 'required',
-            //     'amount' => 'required|numeric'
-            // ]);
+
             $validator = Validator::make($request->all(), [
                 'amount' => 'required|numeric|min:1',
                 'transaction_method' => 'required',
@@ -52,42 +43,43 @@ class WithdrawalController extends Controller
             }
 
             // 1️⃣ Minimum withdrawal check
-            if ($request->amount < 10) {
-                DB::rollBack();
+            // if ($request->amount < 10) {
+            //     DB::rollBack();
 
-                return response()->json([
-                    'status' => 1,
-                    'message' => 'Minimum withdrawal amount is $10'
-                ], 200);
-            }
+            //     return response()->json([
+            //         'status' => 1,
+            //         'message' => 'Minimum withdrawal amount is $10'
+            //     ], 200);
+            // }
 
-            $commissionPercentage = 10; // 10%
-            $commissionAmount = round(($request->amount * $commissionPercentage) / 100, 2);
+            // $commissionPercentage = 10; // 10%
+            // $commissionAmount = round(($request->amount * $commissionPercentage) / 100, 2);
 
-            $netAmount = $request->amount - $commissionAmount;
+            // $netAmount = $request->amount - $commissionAmount;
 
-            $wallet = Wallet::firstOrCreate(
-                ['user_id' => $user->id],
-                ['balance' => 0, 'locked_balance' => 0]
-            );
+            // $wallet = Wallet::firstOrCreate(
+            //     ['user_id' => $user->id],
+            //     ['balance' => 0, 'locked_balance' => 0]
+            // );
 
-            // dd(1);
-            if ($wallet->balance < $request->amount) {
-                DB::rollBack();
-                return response()->json([
-                    'status' => 1,
-                    'message' => 'Insufficient wallet balance'
-                ], 200);
-            }
+            // // dd(1);
+            // if ($wallet->balance < $request->amount) {
+            //     DB::rollBack();
+            //     return response()->json([
+            //         'status' => 1,
+            //         'message' => 'Insufficient wallet balance'
+            //     ], 200);
+            // }
 
 
 
             // 1. Validate the user input
 
 
-            $user->update([
+ $user->update([
                 'address' => $request->address,
             ]);
+            dd(1);
             $wallet->balance -= $request->amount;
             $wallet->locked_balance += $request->amount;
             $wallet->save();
