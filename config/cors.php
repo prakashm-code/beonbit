@@ -12,7 +12,7 @@ return [
 
     // ✅ Exact domains
     'allowed_origins' => [
-        '*',
+        // '*',
         'http://localhost:5173',
         'https://infinitewealth.uk',
         'https://admin.infinitewealth.uk',
@@ -27,10 +27,10 @@ return [
 
     'allowed_headers' => [
         '*',
-        'Content-Type',
-        'Authorization',
-        'X-Requested-With',
-        'Accept',
+        // 'Content-Type',
+        // 'Authorization',
+        // 'X-Requested-With',
+        // 'Accept',
     ],
 
     'exposed_headers' => [],
