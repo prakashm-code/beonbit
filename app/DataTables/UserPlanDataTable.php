@@ -53,7 +53,8 @@ class UserPlanDataTable extends DataTable
                             $q->orWhere('start_date', 'LIKE', "%{$keyword}%");
                             $q->orWhere('end_date', 'LIKE', "%{$keyword}%");
                             $q->orWhere('amount', 'LIKE', "%{$keyword}%");
-                            $q->orWhere('daily_return_percent', 'LIKE', "%{$keyword}%");
+                            // $q->orWhere('daily_return_percent', 'LIKE', "%{$keyword}%");
+                            $q->orWhere('total_interest', 'LIKE', "%{$keyword}%");
                             $q->orWhere('status', 'LIKE', "%{$keyword}%");
                         });
                     }
