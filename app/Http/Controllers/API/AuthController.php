@@ -275,7 +275,7 @@ class AuthController extends Controller
         $user->reset_token_expiry = Carbon::now()->addMinutes(10);
         $user->save();
 
-        $resetLink = url('/reset-password?token=' . $token);
+        $resetLink = url('/new-password?token=' . $token);
 
         Mail::send('emails.forgot_password', [
             'user' => $user,
