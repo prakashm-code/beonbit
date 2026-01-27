@@ -78,6 +78,9 @@ class UserPlanDataTable extends DataTable
             ->addColumn('amount', function ($row) {
                 return '$'.$row->amount;
             })
+              ->addColumn('total_interest', function ($row) {
+                return '$'.$row->total_interest;
+            })
             ->addColumn('status', function ($row) {
                 return $row->status;
             })
@@ -96,7 +99,7 @@ class UserPlanDataTable extends DataTable
                             </div>';
             })
 
-            ->rawColumns(['checkbox', 'email', 'plan', 'start_date', 'end_date', 'amount', 'status', 'actions']);
+            ->rawColumns(['checkbox', 'email', 'plan', 'start_date', 'end_date', 'amount','total_interest', 'status', 'actions']);
     }
 
     /**
@@ -113,7 +116,8 @@ class UserPlanDataTable extends DataTable
                 3 => 'start_date',
                 4 => 'end_date',
                 5 => 'amount',
-                6 => 'status'
+                6 => 'total_interest',
+                7 => 'status'
             ];
 
             $orderIndex = $request->input('order.0.column', 0);
@@ -193,6 +197,7 @@ class UserPlanDataTable extends DataTable
             Column::make('start_date')->title('Start Date')->orderable(true),
             Column::make('end_date')->title('End Date')->orderable(true),
             Column::make('amount')->title('Amount($)')->orderable(true),
+            Column::make('total_interest')->title('Total Interest($)')->orderable(false),
             Column::make('status')->title('Status')->orderable(false),
             // Column::make('actions')->title('Actions')->orderable(false)
         ];
