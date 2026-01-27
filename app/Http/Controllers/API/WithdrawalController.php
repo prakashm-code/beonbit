@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\WithdrawalRequestedMail;
+use App\Models\User;
 
 class WithdrawalController extends Controller
 {
@@ -43,14 +44,14 @@ class WithdrawalController extends Controller
             }
 
             // 1️⃣ Minimum withdrawal check
-            if ($request->amount < 10) {
-                DB::rollBack();
+            // if ($request->amount < 10) {
+            //     DB::rollBack();
 
-                return response()->json([
-                    'status' => 1,
-                    'message' => 'Minimum withdrawal amount is $10'
-                ], 200);
-            }
+            //     return response()->json([
+            //         'status' => 1,
+            //         'message' => 'Minimum withdrawal amount is $10'
+            //     ], 200);
+            // }
 
             $commissionPercentage = 10; // 10%
             $commissionAmount = round(($request->amount * $commissionPercentage) / 100, 2);
@@ -63,23 +64,22 @@ class WithdrawalController extends Controller
             );
 
             // dd(1);
-            if ($wallet->balance < $request->amount) {
-                DB::rollBack();
-                return response()->json([
-                    'status' => 1,
-                    'message' => 'Insufficient wallet balance'
-                ], 200);
-            }
+            // if ($wallet->balance < $request->amount) {
+            //     DB::rollBack();
+            //     return response()->json([
+            //         'status' => 1,
+            //         'message' => 'Insufficient wallet balance'
+            //     ], 200);
+            // }
 
 
 
-            // 1. Validate the user input
+            // $updateAdd= User::where('id',$user->id)->first()
 
-
- $user->update([
+            $user->update([
                 'address' => $request->address,
             ]);
-            dd(1);
+            // dd(1);
             $wallet->balance -= $request->amount;
             $wallet->locked_balance += $request->amount;
             $wallet->save();
@@ -106,8 +106,8 @@ class WithdrawalController extends Controller
                 'description' => 'Wallet withdrawal'
             ]);
 
-            // Mail::to('testxyz@yopmail.com')
-            Mail::to('infinitewealth3195@gmail.com')
+            Mail::to('testxyz@yopmail.com')
+                // Mail::to('infinitewealth3195@gmail.com')
                 ->send(new WithdrawalRequestedMail([
                     'email'        => $user->email,
                     'amount'       => $request->amount,

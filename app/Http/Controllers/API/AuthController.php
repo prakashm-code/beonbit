@@ -166,7 +166,7 @@ class AuthController extends Controller
                     'phone'            => $user->phone,
                     'profile' => asset('assets/front/img/profile/' . $user->profile),
                     'country'          => $user->country,
-                    'address'          => $user->address,
+                    'wallet_address'          => $user->address,
                     'id_proof'         => $user->id_proof,
                     'wallet_balance'   => (float)  $user->wallet->balance ?? 0,
                     // 'investment_amount' => (float) $user->investment_amount,
