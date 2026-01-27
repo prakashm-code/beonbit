@@ -9,6 +9,9 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\ReferralController;
 use App\Http\Controllers\API\WalletController;
 use App\Http\Controllers\API\WithdrawalController;
+use App\Http\Controllers\API\WithdrawalController as APIWithdrawalController;
+
+// use App\Http\Controllers\API\WithdrawalController as APIWithdrawalController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
@@ -19,6 +22,7 @@ Route::post('/send_verify_email', [AuthController::class, 'verifyEmail']);
 
 Route::group(['middleware' => CheckUser::class], function () {
     Route::post('/update_profile', [AuthController::class, 'updateProfile']);
+    Route::post('/reset_new_password', [AuthController::class, 'resetNewPassword']);
 
     Route::post('/user_dashboard', [AuthController::class, 'dashboard']);
     Route::get('/get_plans', [PlanController::class, 'index']);
@@ -36,9 +40,9 @@ Route::group(['middleware' => CheckUser::class], function () {
     Route::get('/my_referrals_levelwise', [ReferralController::class, 'myReferralsLevelWise']);
 
 
-    Route::post('/withdraw_list', [WithdrawalController::class, 'history']);
-    Route::post('/withdraw_request', [WithdrawalController::class, 'request']);
-    Route::post('/withdraw', [WithdrawalController::class, 'withdraw']);
+    Route::post('/withdraw_list', [APIWithdrawalController::class, 'history']);
+    Route::post('/withdraw_request', [APIWithdrawalController::class, 'request']);
+    Route::post('/withdraw', [APIWithdrawalController::class, 'withdraw']);
 
     Route::get('/logout', [AuthController::class, 'logout']);
 });

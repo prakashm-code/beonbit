@@ -332,6 +332,45 @@ class AuthController extends Controller
         ], 200);
     }
 
+    public function resetNewPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'old_password' => 'required',
+            'new_password' => 'required|different:old_password',
+        ]);
+
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 1,
+                'message' => $validator->errors()->first()
+            ], 200);
+        }
+
+
+        // Authenticated user (API)
+        $user = Auth::guard('api')->user();
+
+
+        // Match old password
+        if (!Hash::check($request->old_password, $user->password)) {
+            return response()->json([
+                'status' => 1,
+                'message' => 'Old password is incorrect'
+            ], 200);
+        }
+
+
+        $user->update([
+            'password' => Hash::make($request->new_password),
+        ]);
+
+
+        return response()->json([
+            'status' => 0,
+            'message' => 'Password changed successfully'
+        ], 200);
+    }
 
     public function verifyEmail(Request $request)
     {
