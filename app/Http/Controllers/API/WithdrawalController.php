@@ -43,33 +43,33 @@ class WithdrawalController extends Controller
             }
 
             // 1️⃣ Minimum withdrawal check
-            // if ($request->amount < 10) {
-            //     DB::rollBack();
+            if ($request->amount < 10) {
+                DB::rollBack();
 
-            //     return response()->json([
-            //         'status' => 1,
-            //         'message' => 'Minimum withdrawal amount is $10'
-            //     ], 200);
-            // }
+                return response()->json([
+                    'status' => 1,
+                    'message' => 'Minimum withdrawal amount is $10'
+                ], 200);
+            }
 
-            // $commissionPercentage = 10; // 10%
-            // $commissionAmount = round(($request->amount * $commissionPercentage) / 100, 2);
+            $commissionPercentage = 10; // 10%
+            $commissionAmount = round(($request->amount * $commissionPercentage) / 100, 2);
 
-            // $netAmount = $request->amount - $commissionAmount;
+            $netAmount = $request->amount - $commissionAmount;
 
-            // $wallet = Wallet::firstOrCreate(
-            //     ['user_id' => $user->id],
-            //     ['balance' => 0, 'locked_balance' => 0]
-            // );
+            $wallet = Wallet::firstOrCreate(
+                ['user_id' => $user->id],
+                ['balance' => 0, 'locked_balance' => 0]
+            );
 
-            // // dd(1);
-            // if ($wallet->balance < $request->amount) {
-            //     DB::rollBack();
-            //     return response()->json([
-            //         'status' => 1,
-            //         'message' => 'Insufficient wallet balance'
-            //     ], 200);
-            // }
+            // dd(1);
+            if ($wallet->balance < $request->amount) {
+                DB::rollBack();
+                return response()->json([
+                    'status' => 1,
+                    'message' => 'Insufficient wallet balance'
+                ], 200);
+            }
 
 
 
