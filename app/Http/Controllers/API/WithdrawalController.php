@@ -1,5 +1,6 @@
 <?php
 
+// namespace App\Http\Controllers\API;
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\WithdrawalRequestedMail;
+
 class WithdrawalController extends Controller
 {
     public function request(Request $request)
@@ -30,6 +32,23 @@ class WithdrawalController extends Controller
 
         try {
             $user = Auth::guard('api')->user();
+
+            // $request->validate([
+            //     'address' => 'required',
+            //     'amount' => 'required|numeric'
+            // ]);
+            $validator = Validator::make($request->all(), [
+                'address' => 'required',
+                'amount' => 'required|numeric'
+            ]);
+
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 1,
+                    'message' => $validator->errors()->first()
+                ], 200);
+            }
 
             // 1️⃣ Minimum withdrawal check
             if ($request->amount < 10) {
@@ -63,61 +82,60 @@ class WithdrawalController extends Controller
 
 
             // 1. Validate the user input
-            $request->validate([
-                'address' => 'required',
-                'amount' => 'required|numeric'
+
+
+            $user->update([
+                'address' => $request->address,
+            ]);
+            $wallet->balance -= $request->amount;
+            $wallet->locked_balance += $request->amount;
+            $wallet->save();
+
+
+            $withdrawal = WithdrawRequest::create([
+                'user_id'    => $user->id,
+                'amount'     => $request->amount,
+                // 'commissio   ./n' => $commissionAmount,
+                'method'     => $request->transaction_method,
+                'status'     => 'pending',
+            ]);
+            // ]);
+            // dd(1);
+            Transaction::create([
+                'user_id' => $user->id,
+                'type' => 'debit',
+                'category' => 'withdrawal',
+                'isEarning' => '0',
+                'amount' => $request->amount,
+                'commission' => $commissionAmount,
+                'balance_after' => $wallet->balance,
+                'transaction_reference' => 'Withdrawal',
+                'description' => 'Wallet withdrawal'
             ]);
 
+            // Mail::to('testxyz@yopmail.com')
+            Mail::to('infinitewealth3195@gmail.com')
+                ->send(new WithdrawalRequestedMail([
+                    'email'        => $user->email,
+                    'amount'       => $request->amount,
+                    'commission'   => $commissionAmount,
+                    'net_amount'   => $netAmount,
+                    'status'       => $withdrawal->status,
+                    'withdrawal_id' => $withdrawal->id,
+                ]));
 
-                $wallet->balance -= $request->amount;
-                $wallet->locked_balance += $request->amount;
-                $wallet->save();
-
-                $withdrawal = WithdrawRequest::create([
-                    'user_id'    => $user->id,
-                    'amount'     => $request->amount,
-                    // 'commissio   ./n' => $commissionAmount,
-                    'method'     => $request->transaction_method,
-                    'status'     => 'pending',
-                ]);
-                // ]);
-                // dd(1);
-                Transaction::create([
-                    'user_id' => $user->id,
-                    'type' => 'debit',
-                    'category' => 'withdrawal',
-                    'isEarning' => '0',
-                    'amount' => $request->amount,
-                    'commission' => $commissionAmount,
-                    'balance_after' => $wallet->balance,
-                    'transaction_reference' => 'Withdrawal',
-                    'description' => 'Wallet withdrawal'
-                ]);
-
-// Mail::to('testxyz@yopmail.com')
-Mail::to('infinitewealth3195@gmail.com')
-    ->send(new WithdrawalRequestedMail([
-        'email'        => $user->email,
-        'amount'       => $request->amount,
-        'commission'   => $commissionAmount,
-        'net_amount'   => $netAmount,
-        'status'       => $withdrawal->status,
-        'withdrawal_id'=> $withdrawal->id,
-    ]));
-
-                DB::commit();
-                return response()->json([
-                    'status' => 0,
-                    'message' => 'Withdrawal successful',
-                    'data' => [
-                        'withdrawal_id'     => $withdrawal->id,
-                        'requested_amount' => $request->amount,
-                        'commission'       => $commissionAmount,
-                        'net_amount'        => $netAmount,
-                        'status'            => $withdrawal->status
-                    ]
-                ], 200);
-
+            DB::commit();
+            return response()->json([
+                'status' => 0,
+                'message' => 'Withdrawal successful',
+                'data' => [
+                    'withdrawal_id'     => $withdrawal->id,
+                    'requested_amount' => $request->amount,
+                    'commission'       => $commissionAmount,
+                    'net_amount'        => $netAmount,
+                    'status'            => $withdrawal->status
+                ]
+            ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
 
