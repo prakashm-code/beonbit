@@ -12,10 +12,12 @@ return [
 
     // ✅ Exact domains
     'allowed_origins' => [
+        '*',
         'http://localhost:5173',
         'https://infinitewealth.uk',
         'https://admin.infinitewealth.uk',
         'https://app.infinitewealth.uk',
+        'https://backend.infinitewealth.uk'
     ],
 
     // ✅ Wildcard subdomains go here
@@ -24,6 +26,7 @@ return [
     ],
 
     'allowed_headers' => [
+        '*',
         'Content-Type',
         'Authorization',
         'X-Requested-With',
