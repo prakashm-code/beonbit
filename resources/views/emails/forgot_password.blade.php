@@ -48,7 +48,7 @@
 
                     <tr>
                         <td style="padding-top:20px; color:#999; font-size:13px;">
-                            <p>Regards,<br>BeonBit Team</p>
+                            <p>Regards,<br>Infinitewealth </p>
                         </td>
                     </tr>
 

@@ -63,7 +63,7 @@
 
                         <p style="margin-top:20px;">
                             Regards,<br>
-                            <strong>{{ config('app.name') }}</strong>
+                            <strong>Infinitewealth </strong>
                         </p>
                     </td>
                 </tr>

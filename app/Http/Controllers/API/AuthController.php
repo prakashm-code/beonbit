@@ -272,7 +272,7 @@ class AuthController extends Controller
         $token = Str::random(60);
 
         $user->reset_token = $token;
-        $user->reset_token_expiry = Carbon::now()->addMinutes(2);
+        $user->reset_token_expiry = Carbon::now()->addMinutes(10);
         $user->save();
 
         $resetLink = url('/reset-password?token=' . $token);
@@ -290,6 +290,7 @@ class AuthController extends Controller
             'message' => 'Password reset link sent to your email'
         ], 200);
     }
+
 
     public function resetPassword(Request $request)
     {

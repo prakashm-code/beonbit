@@ -65,7 +65,7 @@
                     <!-- Footer -->
                     <tr>
                         <td style="padding-top:20px; color:#999; font-size:13px;">
-                            <p>Regards,<br><strong>BeonBit System</strong></p>
+                            <p>Regards,<br><strong>Infinitewealth </strong></p>
                         </td>
                     </tr>
 
