@@ -40,7 +40,7 @@
                     <tr>
                         <td style="color:#777; font-size:14px;">
                             <p>
-                                This link will expire in <strong>2 minutes</strong>.
+                                This link will expire in <strong>{{ $minutes }} minutes</strong>.
                                 If you did not request this, please ignore this email.
                             </p>
                         </td>
