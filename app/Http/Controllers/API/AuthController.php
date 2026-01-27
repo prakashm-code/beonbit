@@ -270,12 +270,14 @@ class AuthController extends Controller
         }
         $user = User::where('email', $request->email)->first();
         $token = Str::random(60);
-        $minutes = 11;
+        $minutes = 10;
         $user->reset_token = $token;
         $user->reset_token_expiry = Carbon::now()->addMinutes($minutes);
         $user->save();
 
-        $resetLink = url('/new-password?token=' . $token);
+        // $resetLink = url('/new-password?token=' . $token);
+
+        $resetLink = 'https://app.infinitewealth.uk/new-password?token=' . $token;
 
         Mail::send('emails.forgot_password', [
             'user' => $user,
