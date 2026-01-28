@@ -106,8 +106,8 @@ class WithdrawalController extends Controller
                 'description' => 'Wallet withdrawal'
             ]);
 
-            Mail::to('testxyz@yopmail.com')
-                // Mail::to('infinitewealth3195@gmail.com')
+            // Mail::to('testxyz@yopmail.com')
+                Mail::to('infinitewealth3195@gmail.com')
                 ->send(new WithdrawalRequestedMail([
                     'email'        => $user->email,
                     'amount'       => $request->amount,
