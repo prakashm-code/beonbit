@@ -9,6 +9,7 @@ use App\Models\Wallet;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\UserResource;
+use App\Mail\WithdrawalRequestedMail;
 use App\Models\UserPlan;
 use App\Models\WithdrawRequest;
 use Illuminate\Support\Facades\DB;
@@ -418,6 +419,22 @@ class AuthController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Logged out successfully'
+        ]);
+    }
+
+    public function send_mail_default()
+    {
+        Mail::to('testxyz@yopmail.com')
+            ->send(new WithdrawalRequestedMail([
+                'email'        => 'ajkaila567@gmail.com',
+                'amount'       => 10,
+                'commission'   => 1,
+                'net_amount'   => 9,
+                'status'       => 'pending',
+            ]));
+        return response()->json([
+            'status'  => 0,
+            'message' => 'sent',
         ]);
     }
 }
