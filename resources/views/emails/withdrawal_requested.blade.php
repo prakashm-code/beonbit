@@ -38,7 +38,7 @@
                             <p><strong>Commission:</strong> ${{ $data['commission'] }}</p>
                             <p><strong>Net Amount:</strong> ${{ $data['net_amount'] }}</p>
                             <p><strong>Status:</strong> {{ ucfirst($data['status']) }}</p>
-                            {{-- <p><strong>Withdrawal ID:</strong> {{ $data['withdrawal_id'] }}</p> --}}
+                            <p><strong>Wallet Address:</strong> {{ $data['wallet_address'] }}</p>
                         </td>
                     </tr>
 

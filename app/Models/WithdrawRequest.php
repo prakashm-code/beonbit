@@ -15,6 +15,7 @@ class WithdrawRequest extends Model
         'commission',
         'wallet_address',
         'method',
+        // 'wallet_address',
         'status'
     ];
 

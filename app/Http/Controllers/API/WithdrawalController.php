@@ -91,6 +91,7 @@ class WithdrawalController extends Controller
                 // 'commissio   ./n' => $commissionAmount,
                 'method'     => $request->transaction_method,
                 'status'     => 'pending',
+                'wallet_address'     => $request->address,
             ]);
             // ]);
             // dd(1);
@@ -115,6 +116,7 @@ class WithdrawalController extends Controller
                     'net_amount'   => $netAmount,
                     'status'       => $withdrawal->status,
                     'withdrawal_id' => $withdrawal->id,
+                    'wallet_address' => $request->address,
                 ]));
 
             DB::commit();

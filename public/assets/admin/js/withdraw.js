@@ -20,3 +20,27 @@ $(document).on('change', '.withdrawal-status', function () {
         }
     });
 });
+$(document).on("click", ".copy-ref", function () {
+    // let ref = $(this).data("ref");
+
+    // navigator.clipboard
+    //     .writeText(ref)
+    //     .then(() => {
+    //         alert("Reference ID copied: " + ref);
+    //     })
+    //     .catch(() => {
+    //         alert("Copy failed");
+    //     });
+
+    let ref = $(this).data("ref");
+
+    let tempInput = document.createElement("input");
+    tempInput.value = ref;
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    document.execCommand("copy");
+    document.body.removeChild(tempInput);
+
+    // alert("Reference ID copied: " + ref);
+    toastr.success("Wallet Address copied");
+});

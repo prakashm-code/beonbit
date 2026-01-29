@@ -59,7 +59,7 @@ class WithdrawDataTable extends DataTable
                 return $row->user->email;
             })
             ->addColumn('amount', function ($row) {
-                return '$'.$row->amount;
+                return '$' . $row->amount;
             })
             ->addColumn('status', function ($row) {
 
@@ -80,7 +80,33 @@ class WithdrawDataTable extends DataTable
                 // return 'Success';
                 return $html;
             })
+            ->addColumn('wallet_address', function ($row) {
+                // return $row->user->address;
+                //  return substr($row->user->address, 0, length: 15) . '...';
 
+                //   return '
+                //     <span class="ref-text">' . substr($row->user->address, 0, length: 15) . '...' . '</span>
+                //     <i class="ti ti-clipboard-copy copy-ref"
+                //        style="cursor:pointer; margin-left:6px;"
+                //        data-ref="' .$row->user->address  . '"
+                //        title="Copy"></i>
+                // ';
+                $address = $row->wallet_address;
+
+                if($address){
+                return '
+    <span class="ref-text">' . substr($address, 0, 6) . '...' . substr($address, -4) . '</span>
+    <i class="ti ti-clipboard-copy copy-ref"
+       style="cursor:pointer; margin-left:6px;"
+       data-ref="' . $address . '"
+       title="Copy"></i>
+';
+                }
+                else{
+                    return '...';
+                }
+
+            })
             ->addColumn('method', function ($row) {
                 return $row->method;
             })
@@ -100,7 +126,7 @@ class WithdrawDataTable extends DataTable
                             </div>';
             })
 
-            ->rawColumns(['checkbox', 'email', 'amount', 'status', 'method', 'created_at', 'actions']);
+            ->rawColumns(['checkbox', 'email', 'amount', 'status', 'wallet_address', 'method', 'created_at', 'actions']);
     }
 
     /**
@@ -167,6 +193,7 @@ class WithdrawDataTable extends DataTable
             Column::make('email')->title('Email')->orderable(true),
             Column::make('amount')->title('Withdarwal Amount($)')->orderable(true),
             Column::make('status')->title('Status')->orderable(true),
+            Column::make('wallet_address')->title('Wallet Address')->orderable(true),
             Column::make('method')->title('Method')->orderable(true),
             Column::make('created_at')->title(value: 'Request Date')->orderable(true),
             // Column::make('actions')->title('Actions')->orderable(false),
