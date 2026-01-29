@@ -95,7 +95,7 @@ class WithdrawDataTable extends DataTable
 
                 if($address){
                 return '
-    <span class="ref-text">' . substr($address, 0, 6) . '...' . substr($address, -4) . '</span>
+    <span class="ref-text">' . substr($address, 0, 5) . '...' . substr($address, -4) . '</span>
     <i class="ti ti-clipboard-copy copy-ref"
        style="cursor:pointer; margin-left:6px;"
        data-ref="' . $address . '"
