@@ -20,6 +20,8 @@ Route::post('/reset_password', [AuthController::class, 'resetPassword']);
 Route::get('/user_profile', [AuthController::class, 'profile']);
 Route::post('/send_verify_email', [AuthController::class, 'verifyEmail']);
 Route::post('/send_mail_default', [AuthController::class, 'send_mail_default']);
+Route::get('/get_informative', [AuthController::class, 'getInformative']);
+Route::post('/update_informative', [AuthController::class, 'updateInformative']);
 
 Route::group(['middleware' => CheckUser::class], function () {
     Route::post('/update_profile', [AuthController::class, 'updateProfile']);

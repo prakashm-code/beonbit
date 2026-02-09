@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\UserResource;
 use App\Mail\WithdrawalRequestedMail;
+use App\Models\Informative;
 use App\Models\UserPlan;
 use App\Models\WithdrawRequest;
 use Illuminate\Support\Facades\DB;
@@ -435,6 +436,56 @@ class AuthController extends Controller
         return response()->json([
             'status'  => 0,
             'message' => 'sent',
+        ]);
+    }
+    public function getInformative()
+    {
+        $info = Informative::first();
+
+        if (!$info) {
+            return response()->json([
+                'status' => 1,
+                'message' => 'Record not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 0,
+            'message' => 'Informative data',
+            'isInformative' =>  $info->is_informative
+        ]);
+    }
+    public function updateInformative(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'isInformative' => 'required|in:0,1',
+        ]);
+
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 1,
+                'message' => $validator->errors()->first()
+            ], 200);
+        }
+
+
+        $info = Informative::first();
+
+        if (!$info) {
+            $info = Informative::create([
+                'is_informative' => $request->isInformative,
+            ]);
+        } else {
+            $info->update([
+                'is_informative' => $request->isInformative,
+            ]);
+        }
+
+        return response()->json([
+            'status' => 0,
+            'message' => 'Updated successfully',
+            'isInformative' => $info->is_informative
         ]);
     }
 }
